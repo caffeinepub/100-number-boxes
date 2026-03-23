@@ -24,6 +24,7 @@ export interface Entry {
 }
 export type Time = bigint;
 export interface _SERVICE {
+  'deleteData' : ActorMethod<[Time, string, string], undefined>,
   'getAllData' : ActorMethod<[], Array<Entry>>,
   'getDataByDate' : ActorMethod<[Time], Array<Entry>>,
   'getDataByParty' : ActorMethod<[string], Array<Entry>>,

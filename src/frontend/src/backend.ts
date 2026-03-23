@@ -103,6 +103,7 @@ export interface Entry {
 }
 export type Time = bigint;
 export interface backendInterface {
+    deleteData(date: Time, game: string, party: string): Promise<void>;
     getAllData(): Promise<Array<Entry>>;
     getDataByDate(date: Time): Promise<Array<Entry>>;
     getDataByParty(party: string): Promise<Array<Entry>>;
@@ -110,6 +111,20 @@ export interface backendInterface {
 }
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
+    async deleteData(arg0: Time, arg1: string, arg2: string): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.deleteData(arg0, arg1, arg2);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.deleteData(arg0, arg1, arg2);
+            return result;
+        }
+    }
     async getAllData(): Promise<Array<Entry>> {
         if (this.processError) {
             try {

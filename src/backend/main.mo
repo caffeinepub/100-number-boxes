@@ -48,6 +48,15 @@ actor {
     entries.add(key, entry);
   };
 
+  public shared ({ caller }) func deleteData(
+    date : Time.Time,
+    game : Text,
+    party : Text,
+  ) : async () {
+    let key = date.toText() # game # party;
+    entries.remove(key); // Use remove which returns ().
+  };
+
   public query ({ caller }) func getDataByDate(date : Time.Time) : async [Entry] {
     entries.values().toArray().filter(
       func(entry) { entry.date == date }
@@ -64,4 +73,3 @@ actor {
     entries.values().toArray();
   };
 };
-

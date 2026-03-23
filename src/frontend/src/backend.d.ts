@@ -21,6 +21,7 @@ export interface Entry {
 }
 export type Time = bigint;
 export interface backendInterface {
+    deleteData(date: Time, game: string, party: string): Promise<void>;
     getAllData(): Promise<Array<Entry>>;
     getDataByDate(date: Time): Promise<Array<Entry>>;
     getDataByParty(party: string): Promise<Array<Entry>>;

@@ -1,10 +1,10 @@
 import { Toaster } from "@/components/ui/sonner";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useActor } from "./hooks/useActor";
 
-const GAMES = ["DS", "SP", "DP", "TP"] as const;
+const GAMES = ["DS", "FB", "GB", "GL"] as const;
 const RADIO_OPTIONS = [
   "Actual Yantri",
   "Daily Collection",
@@ -34,8 +34,18 @@ function dateToTime(dateStr: string): bigint {
   return BigInt(new Date(dateStr).getTime() * 1_000_000);
 }
 
+function nsToDateStr(ns: bigint): string {
+  const ms = Number(ns) / 1_000_000;
+  return new Date(ms).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
 export default function App() {
   const { actor } = useActor();
+  const queryClient = useQueryClient();
   const currentYear = new Date().getFullYear();
   const hostname = encodeURIComponent(window.location.hostname);
 
@@ -55,6 +65,42 @@ export default function App() {
   const [cuttingPercentage, setCuttingPercentage] = useState("");
   const [multiplyN, setMultiplyN] = useState("");
   const [highColor, setHighColor] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+
+  // Search + Add state
+  const [searchNum, setSearchNum] = useState("");
+  const [addAmount, setAddAmount] = useState("");
+
+  const searchIndex = useMemo(() => {
+    const n = Number.parseInt(searchNum, 10);
+    if (Number.isNaN(n) || n < 1 || n > 100) return -1;
+    return n - 1;
+  }, [searchNum]);
+
+  const searchCurrentValue = useMemo(() => {
+    if (searchIndex < 0) return null;
+    return toNum(values[searchIndex]);
+  }, [searchIndex, values]);
+
+  const handleSearchAdd = useCallback(() => {
+    if (searchIndex < 0) {
+      toast.error("Sahi number daalen (1 se 100 ke beech)");
+      return;
+    }
+    const addVal = toNum(addAmount);
+    if (addVal === 0) {
+      toast.error("Add karne ki amount daalen");
+      return;
+    }
+    setValues((prev) => {
+      const next = [...prev];
+      const current = toNum(next[searchIndex]);
+      next[searchIndex] = String(current + addVal);
+      return next;
+    });
+    toast.success(`Number ${searchNum} mein ${addVal} add ho gaya!`);
+    setAddAmount("");
+  }, [searchIndex, addAmount, searchNum]);
 
   const rowTotals = useMemo(() => {
     return ROWS.map((row) =>
@@ -118,6 +164,41 @@ export default function App() {
       return actor.getDataByParty(party);
     },
     enabled: false,
+  });
+
+  // History query
+  const {
+    data: historyData,
+    isLoading: historyLoading,
+    refetch: refetchHistory,
+  } = useQuery({
+    queryKey: ["history"],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getAllData();
+    },
+    enabled: showHistory && !!actor,
+  });
+
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async ({
+      date: d,
+      game: g,
+      party: p,
+    }: {
+      date: bigint;
+      game: string;
+      party: string;
+    }) => {
+      if (!actor) throw new Error("Backend connect nahi hua");
+      await actor.deleteData(d, g, p);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["history"] });
+      toast.success("Record delete ho gaya!");
+    },
+    onError: () => toast.error("Delete nahi hua, dobara try karein"),
   });
 
   const handleShow = async () => {
@@ -189,8 +270,131 @@ export default function App() {
       <Toaster />
       <div className="bg-[#003366] text-white px-3 py-1 flex items-center justify-between">
         <span className="font-bold text-sm">Lottery Collection Entry</span>
-        <span className="text-[10px] opacity-70">v2.0</span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setShowHistory(true);
+              refetchHistory();
+            }}
+            className="bg-[#cc8800] hover:bg-[#ffaa00] text-white text-[11px] font-bold px-3 py-0.5 border border-[#ffcc44] rounded-sm transition-colors"
+            data-ocid="history.open_modal_button"
+          >
+            📋 इतिहास
+          </button>
+          <span className="text-[10px] opacity-70">v2.0</span>
+        </div>
       </div>
+
+      {/* History Modal */}
+      {showHistory && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 flex items-start justify-center overflow-y-auto"
+          data-ocid="history.modal"
+        >
+          <div className="bg-white w-full max-w-2xl my-4 mx-2 shadow-2xl rounded-sm">
+            <div className="bg-[#003366] text-white px-4 py-2 flex items-center justify-between">
+              <span className="font-bold text-sm">📋 इतिहास (History)</span>
+              <button
+                type="button"
+                onClick={() => setShowHistory(false)}
+                className="text-white hover:text-[#ffcc44] text-lg font-bold leading-none px-1"
+                data-ocid="history.close_button"
+              >
+                ✕ बंद करें
+              </button>
+            </div>
+            <div className="p-3">
+              {historyLoading ? (
+                <div
+                  className="text-center py-8 text-[#003366] font-bold text-sm"
+                  data-ocid="history.loading_state"
+                >
+                  लोड हो रहा है...
+                </div>
+              ) : !historyData || historyData.length === 0 ? (
+                <div
+                  className="text-center py-8 text-[#666] text-sm"
+                  data-ocid="history.empty_state"
+                >
+                  कोई इतिहास नहीं
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse text-[11px]">
+                    <thead>
+                      <tr className="bg-[#003366] text-white">
+                        <th className="border border-[#004488] px-2 py-1 text-left">
+                          तारीख
+                        </th>
+                        <th className="border border-[#004488] px-2 py-1 text-left">
+                          गेम
+                        </th>
+                        <th className="border border-[#004488] px-2 py-1 text-left">
+                          पार्टी
+                        </th>
+                        <th className="border border-[#004488] px-2 py-1 text-right">
+                          कुल
+                        </th>
+                        <th className="border border-[#004488] px-2 py-1 text-center">
+                          हटाएं
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {historyData.map((entry, idx) => {
+                        const total = entry.numbers.reduce(
+                          (s, v) => s + Number(v),
+                          0,
+                        );
+                        return (
+                          <tr
+                            key={`${entry.date}-${entry.game}-${entry.party}`}
+                            className={
+                              idx % 2 === 0 ? "bg-white" : "bg-[#f5f8ff]"
+                            }
+                            data-ocid={`history.item.${idx + 1}`}
+                          >
+                            <td className="border border-[#c0c0c0] px-2 py-1">
+                              {nsToDateStr(entry.date)}
+                            </td>
+                            <td className="border border-[#c0c0c0] px-2 py-1 font-bold text-[#003366]">
+                              {entry.game}
+                            </td>
+                            <td className="border border-[#c0c0c0] px-2 py-1">
+                              {entry.party || "-"}
+                            </td>
+                            <td className="border border-[#c0c0c0] px-2 py-1 text-right font-bold text-[#cc0000]">
+                              {total.toLocaleString("en-IN")}
+                            </td>
+                            <td className="border border-[#c0c0c0] px-2 py-1 text-center">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  deleteMutation.mutate({
+                                    date: entry.date,
+                                    game: entry.game,
+                                    party: entry.party,
+                                  })
+                                }
+                                disabled={deleteMutation.isPending}
+                                className="bg-[#cc0000] hover:bg-[#ee0000] text-white px-2 py-0.5 text-[10px] font-bold border border-[#880000] disabled:opacity-50"
+                                data-ocid={`history.delete_button.${idx + 1}`}
+                              >
+                                🗑 हटाएं
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="p-2 w-full">
         {/* Row 1 */}
@@ -314,6 +518,98 @@ export default function App() {
           </button>
         </div>
 
+        {/* Search + Add Section */}
+        <div
+          className="bg-[#fffbe6] border-2 border-[#cc8800] p-2 mb-2 w-full"
+          data-ocid="search_add.section"
+        >
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="font-bold text-[11px] text-[#cc6600] whitespace-nowrap">
+              🔍 नंबर खोजें और जोड़ें:
+            </span>
+            <div className="flex items-center gap-1">
+              <label
+                htmlFor="search-num"
+                className="text-[11px] font-bold whitespace-nowrap"
+              >
+                नंबर (1-100):
+              </label>
+              <input
+                id="search-num"
+                type="text"
+                inputMode="numeric"
+                value={searchNum}
+                onChange={(e) => {
+                  if (/^\d{0,3}$/.test(e.target.value))
+                    setSearchNum(e.target.value);
+                }}
+                placeholder="जैसे: 20"
+                className="border-2 border-[#cc8800] bg-white px-2 py-0.5 text-[12px] font-bold w-20 text-center focus:outline-none focus:border-[#cc6600]"
+                data-ocid="search_add.number.input"
+              />
+            </div>
+            {searchCurrentValue !== null && (
+              <div className="flex items-center gap-1 bg-[#fff3cd] border border-[#cc8800] px-2 py-0.5">
+                <span className="text-[11px] font-bold text-[#663300]">
+                  अभी का amount:
+                </span>
+                <span
+                  className="text-[13px] font-bold text-[#cc0000]"
+                  data-ocid="search_add.current_value"
+                >
+                  {searchCurrentValue.toLocaleString("en-IN")}
+                </span>
+              </div>
+            )}
+            <div className="flex items-center gap-1">
+              <label
+                htmlFor="add-amount"
+                className="text-[11px] font-bold whitespace-nowrap"
+              >
+                Add Amount:
+              </label>
+              <input
+                id="add-amount"
+                type="text"
+                inputMode="numeric"
+                value={addAmount}
+                onChange={(e) => {
+                  if (/^\d*$/.test(e.target.value))
+                    setAddAmount(e.target.value);
+                }}
+                placeholder="जोड़ने की राशि"
+                className="border-2 border-[#006600] bg-white px-2 py-0.5 text-[12px] font-bold w-28 text-center focus:outline-none focus:border-[#004400]"
+                data-ocid="search_add.amount.input"
+              />
+            </div>
+            {searchCurrentValue !== null &&
+              addAmount &&
+              toNum(addAmount) > 0 && (
+                <div className="flex items-center gap-1 bg-[#e8ffe8] border border-[#006600] px-2 py-0.5">
+                  <span className="text-[11px] font-bold text-[#004400]">
+                    नया amount:
+                  </span>
+                  <span
+                    className="text-[13px] font-bold text-[#006600]"
+                    data-ocid="search_add.new_value"
+                  >
+                    {(searchCurrentValue + toNum(addAmount)).toLocaleString(
+                      "en-IN",
+                    )}
+                  </span>
+                </div>
+              )}
+            <button
+              type="button"
+              onClick={handleSearchAdd}
+              className="bg-[#cc6600] hover:bg-[#ee8800] text-white px-4 py-1 text-[11px] font-bold border border-[#884400] active:bg-[#aa4400] whitespace-nowrap"
+              data-ocid="search_add.add_button"
+            >
+              ✚ Add करें
+            </button>
+          </div>
+        </div>
+
         {/* Main Grid */}
         <div className="bg-white border border-[#cc3300] w-full overflow-x-auto">
           <table
@@ -346,13 +642,16 @@ export default function App() {
                 <tr key={`row-${row}`}>
                   {COLS.map((col) => {
                     const idx = row * 10 + col;
+                    const isHighlighted = searchIndex === idx;
                     return (
                       <td
                         key={`cell-${idx}`}
-                        className="border border-[#cc3300] p-0 relative"
+                        className={`border border-[#cc3300] p-0 relative ${isHighlighted ? "bg-[#fffbe6] ring-2 ring-[#cc8800] ring-inset" : ""}`}
                         style={{ height: "38px" }}
                       >
-                        <span className="absolute top-0 left-0.5 text-[8px] text-[#cc3300] font-bold leading-none">
+                        <span
+                          className={`absolute top-0 left-0.5 text-[8px] font-bold leading-none ${isHighlighted ? "text-[#cc6600]" : "text-[#cc3300]"}`}
+                        >
                           {idx + 1}
                         </span>
                         <input

@@ -23,6 +23,7 @@ export const Entry = IDL.Record({
 });
 
 export const idlService = IDL.Service({
+  'deleteData' : IDL.Func([Time, IDL.Text, IDL.Text], [], []),
   'getAllData' : IDL.Func([], [IDL.Vec(Entry)], ['query']),
   'getDataByDate' : IDL.Func([Time], [IDL.Vec(Entry)], ['query']),
   'getDataByParty' : IDL.Func([IDL.Text], [IDL.Vec(Entry)], ['query']),
@@ -62,6 +63,7 @@ export const idlFactory = ({ IDL }) => {
   });
   
   return IDL.Service({
+    'deleteData' : IDL.Func([Time, IDL.Text, IDL.Text], [], []),
     'getAllData' : IDL.Func([], [IDL.Vec(Entry)], ['query']),
     'getDataByDate' : IDL.Func([Time], [IDL.Vec(Entry)], ['query']),
     'getDataByParty' : IDL.Func([IDL.Text], [IDL.Vec(Entry)], ['query']),

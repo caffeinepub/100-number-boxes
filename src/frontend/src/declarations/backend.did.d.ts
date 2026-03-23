@@ -10,7 +10,39 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
-export interface _SERVICE {}
+export interface Entry {
+  'bSection' : Array<bigint>,
+  'date' : Time,
+  'game' : string,
+  'cuttingAmount' : bigint,
+  'multiplyValue' : bigint,
+  'numbers' : Array<bigint>,
+  'party' : string,
+  'cuttingType' : bigint,
+  'aSection' : Array<bigint>,
+  'cuttingPercentage' : bigint,
+}
+export type Time = bigint;
+export interface _SERVICE {
+  'getAllData' : ActorMethod<[], Array<Entry>>,
+  'getDataByDate' : ActorMethod<[Time], Array<Entry>>,
+  'getDataByParty' : ActorMethod<[string], Array<Entry>>,
+  'saveData' : ActorMethod<
+    [
+      Time,
+      string,
+      string,
+      Array<bigint>,
+      Array<bigint>,
+      Array<bigint>,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+    ],
+    undefined
+  >,
+}
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];
 export declare const idlFactory: IDL.InterfaceFactory;

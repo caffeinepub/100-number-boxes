@@ -8,10 +8,80 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
-export const idlService = IDL.Service({});
+export const Time = IDL.Int;
+export const Entry = IDL.Record({
+  'bSection' : IDL.Vec(IDL.Nat),
+  'date' : Time,
+  'game' : IDL.Text,
+  'cuttingAmount' : IDL.Nat,
+  'multiplyValue' : IDL.Nat,
+  'numbers' : IDL.Vec(IDL.Nat),
+  'party' : IDL.Text,
+  'cuttingType' : IDL.Int,
+  'aSection' : IDL.Vec(IDL.Nat),
+  'cuttingPercentage' : IDL.Nat,
+});
+
+export const idlService = IDL.Service({
+  'getAllData' : IDL.Func([], [IDL.Vec(Entry)], ['query']),
+  'getDataByDate' : IDL.Func([Time], [IDL.Vec(Entry)], ['query']),
+  'getDataByParty' : IDL.Func([IDL.Text], [IDL.Vec(Entry)], ['query']),
+  'saveData' : IDL.Func(
+      [
+        Time,
+        IDL.Text,
+        IDL.Text,
+        IDL.Vec(IDL.Nat),
+        IDL.Vec(IDL.Nat),
+        IDL.Vec(IDL.Nat),
+        IDL.Int,
+        IDL.Nat,
+        IDL.Nat,
+        IDL.Nat,
+      ],
+      [],
+      [],
+    ),
+});
 
 export const idlInitArgs = [];
 
-export const idlFactory = ({ IDL }) => { return IDL.Service({}); };
+export const idlFactory = ({ IDL }) => {
+  const Time = IDL.Int;
+  const Entry = IDL.Record({
+    'bSection' : IDL.Vec(IDL.Nat),
+    'date' : Time,
+    'game' : IDL.Text,
+    'cuttingAmount' : IDL.Nat,
+    'multiplyValue' : IDL.Nat,
+    'numbers' : IDL.Vec(IDL.Nat),
+    'party' : IDL.Text,
+    'cuttingType' : IDL.Int,
+    'aSection' : IDL.Vec(IDL.Nat),
+    'cuttingPercentage' : IDL.Nat,
+  });
+  
+  return IDL.Service({
+    'getAllData' : IDL.Func([], [IDL.Vec(Entry)], ['query']),
+    'getDataByDate' : IDL.Func([Time], [IDL.Vec(Entry)], ['query']),
+    'getDataByParty' : IDL.Func([IDL.Text], [IDL.Vec(Entry)], ['query']),
+    'saveData' : IDL.Func(
+        [
+          Time,
+          IDL.Text,
+          IDL.Text,
+          IDL.Vec(IDL.Nat),
+          IDL.Vec(IDL.Nat),
+          IDL.Vec(IDL.Nat),
+          IDL.Int,
+          IDL.Nat,
+          IDL.Nat,
+          IDL.Nat,
+        ],
+        [],
+        [],
+      ),
+  });
+};
 
 export const init = ({ IDL }) => { return []; };

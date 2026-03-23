@@ -89,10 +89,83 @@ export class ExternalBlob {
         return this;
     }
 }
+export interface Entry {
+    bSection: Array<bigint>;
+    date: Time;
+    game: string;
+    cuttingAmount: bigint;
+    multiplyValue: bigint;
+    numbers: Array<bigint>;
+    party: string;
+    cuttingType: bigint;
+    aSection: Array<bigint>;
+    cuttingPercentage: bigint;
+}
+export type Time = bigint;
 export interface backendInterface {
+    getAllData(): Promise<Array<Entry>>;
+    getDataByDate(date: Time): Promise<Array<Entry>>;
+    getDataByParty(party: string): Promise<Array<Entry>>;
+    saveData(date: Time, game: string, party: string, numbers: Array<bigint>, bSection: Array<bigint>, aSection: Array<bigint>, cuttingType: bigint, cuttingAmount: bigint, cuttingPercentage: bigint, multiplyValue: bigint): Promise<void>;
 }
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
+    async getAllData(): Promise<Array<Entry>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAllData();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAllData();
+            return result;
+        }
+    }
+    async getDataByDate(arg0: Time): Promise<Array<Entry>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getDataByDate(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getDataByDate(arg0);
+            return result;
+        }
+    }
+    async getDataByParty(arg0: string): Promise<Array<Entry>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getDataByParty(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getDataByParty(arg0);
+            return result;
+        }
+    }
+    async saveData(arg0: Time, arg1: string, arg2: string, arg3: Array<bigint>, arg4: Array<bigint>, arg5: Array<bigint>, arg6: bigint, arg7: bigint, arg8: bigint, arg9: bigint): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.saveData(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.saveData(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+            return result;
+        }
+    }
 }
 export interface CreateActorOptions {
     agent?: Agent;

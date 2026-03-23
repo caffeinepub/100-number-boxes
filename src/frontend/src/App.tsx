@@ -185,14 +185,14 @@ export default function App() {
   });
 
   return (
-    <div className="min-h-screen bg-[#f0f0f0] font-mono text-xs">
+    <div className="min-h-screen bg-[#f0f0f0] font-mono text-xs w-full">
       <Toaster />
       <div className="bg-[#003366] text-white px-3 py-1 flex items-center justify-between">
         <span className="font-bold text-sm">Lottery Collection Entry</span>
         <span className="text-[10px] opacity-70">v2.0</span>
       </div>
 
-      <div className="p-2">
+      <div className="p-2 w-full">
         {/* Row 1 */}
         <div className="bg-white border border-[#c0c0c0] p-2 mb-1 flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-1">
@@ -315,22 +315,28 @@ export default function App() {
         </div>
 
         {/* Main Grid */}
-        <div className="bg-white border border-[#cc3300] overflow-x-auto">
+        <div className="bg-white border border-[#cc3300] w-full overflow-x-auto">
           <table
-            className="border-collapse w-full"
-            style={{ tableLayout: "fixed" }}
+            className="border-collapse"
+            style={{ tableLayout: "fixed", width: "100%" }}
           >
+            <colgroup>
+              {COLS.map((c) => (
+                <col key={c} style={{ width: "8.5%" }} />
+              ))}
+              <col style={{ width: "15%" }} />
+            </colgroup>
             <thead>
               <tr className="bg-[#003366] text-white">
                 {COL_HEADERS.map((h) => (
                   <th
                     key={h}
-                    className="border border-[#cc6600] text-center text-[10px] py-0.5 w-[80px]"
+                    className="border border-[#cc6600] text-center text-[10px] py-0.5"
                   >
                     {h}
                   </th>
                 ))}
-                <th className="border border-[#cc6600] text-center text-[10px] py-0.5 w-[60px] bg-[#004488]">
+                <th className="border border-[#cc6600] text-center text-[10px] py-0.5 bg-[#004488]">
                   Total
                 </th>
               </tr>
@@ -383,21 +389,44 @@ export default function App() {
         </div>
 
         {/* B Section */}
-        <div className="bg-white border border-[#cc3300] mt-1">
+        <div className="bg-white border border-[#cc3300] mt-1 w-full overflow-x-auto">
           <table
-            className="border-collapse w-full"
-            style={{ tableLayout: "fixed" }}
+            className="border-collapse"
+            style={{ tableLayout: "fixed", width: "100%" }}
           >
+            <colgroup>
+              <col style={{ width: "5%" }} />
+              {B_LABELS.map((l) => (
+                <col key={l} style={{ width: "7.8%" }} />
+              ))}
+              <col style={{ width: "12%" }} />
+            </colgroup>
+            <thead>
+              <tr className="bg-[#003366] text-white">
+                <th className="border border-[#cc6600] text-center text-[10px] py-0.5">
+                  B
+                </th>
+                {B_LABELS.map((lbl) => (
+                  <th
+                    key={lbl}
+                    className="border border-[#cc6600] text-center text-[10px] py-0.5"
+                  >
+                    {lbl}
+                  </th>
+                ))}
+                <th className="border border-[#cc6600] text-center text-[10px] py-0.5 bg-[#004488]">
+                  Total
+                </th>
+              </tr>
+            </thead>
             <tbody>
               <tr>
-                <td className="border border-[#cc3300] bg-[#003366] text-white font-bold text-center text-[12px] w-[30px]">
-                  B
-                </td>
+                <td className="border border-[#cc3300] bg-[#f0f4ff]" />
                 {B_LABELS.map((lbl, i) => (
                   <td
                     key={lbl}
                     className="border border-[#cc3300] p-0 relative"
-                    style={{ height: "38px", width: "78px" }}
+                    style={{ height: "38px" }}
                   >
                     <span className="absolute top-0 left-0.5 text-[8px] text-[#cc3300] font-bold leading-none">
                       {lbl}
@@ -412,7 +441,7 @@ export default function App() {
                     />
                   </td>
                 ))}
-                <td className="border border-[#cc3300] text-center text-[11px] font-bold text-[#003366] bg-[#f0f4ff] w-[60px]">
+                <td className="border border-[#cc3300] text-center text-[11px] font-bold text-[#003366] bg-[#f0f4ff]">
                   {fmt(bTotal)}
                 </td>
               </tr>
@@ -421,21 +450,44 @@ export default function App() {
         </div>
 
         {/* A Section */}
-        <div className="bg-white border border-[#cc3300] mt-1">
+        <div className="bg-white border border-[#cc3300] mt-1 w-full overflow-x-auto">
           <table
-            className="border-collapse w-full"
-            style={{ tableLayout: "fixed" }}
+            className="border-collapse"
+            style={{ tableLayout: "fixed", width: "100%" }}
           >
+            <colgroup>
+              <col style={{ width: "5%" }} />
+              {A_LABELS.map((l) => (
+                <col key={l} style={{ width: "7.8%" }} />
+              ))}
+              <col style={{ width: "12%" }} />
+            </colgroup>
+            <thead>
+              <tr className="bg-[#003366] text-white">
+                <th className="border border-[#cc6600] text-center text-[10px] py-0.5">
+                  A
+                </th>
+                {A_LABELS.map((lbl) => (
+                  <th
+                    key={lbl}
+                    className="border border-[#cc6600] text-center text-[10px] py-0.5"
+                  >
+                    {lbl}
+                  </th>
+                ))}
+                <th className="border border-[#cc6600] text-center text-[10px] py-0.5 bg-[#004488]">
+                  Total
+                </th>
+              </tr>
+            </thead>
             <tbody>
               <tr>
-                <td className="border border-[#cc3300] bg-[#003366] text-white font-bold text-center text-[12px] w-[30px]">
-                  A
-                </td>
+                <td className="border border-[#cc3300] bg-[#f0f4ff]" />
                 {A_LABELS.map((lbl, i) => (
                   <td
                     key={lbl}
                     className="border border-[#cc3300] p-0 relative"
-                    style={{ height: "38px", width: "78px" }}
+                    style={{ height: "38px" }}
                   >
                     <span className="absolute top-0 left-0.5 text-[8px] text-[#cc3300] font-bold leading-none">
                       {lbl}
@@ -450,7 +502,7 @@ export default function App() {
                     />
                   </td>
                 ))}
-                <td className="border border-[#cc3300] text-center text-[11px] font-bold text-[#003366] bg-[#f0f4ff] w-[60px]">
+                <td className="border border-[#cc3300] text-center text-[11px] font-bold text-[#003366] bg-[#f0f4ff]">
                   {fmt(aTotal)}
                 </td>
               </tr>

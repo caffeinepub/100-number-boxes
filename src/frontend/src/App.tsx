@@ -18,6 +18,189 @@ const ROWS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 const COLS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 const LS_HISTORY_KEY = "lottery_history_v1";
 const LS_FORM_KEY = "lottery_form_state_v1";
+const LS_GAME_DATA_KEY = "lottery_game_data_v2";
+
+const LS_LANG_KEY = "appLanguage";
+
+const TRANSLATIONS = {
+  hi: {
+    appTitle: "लॉटरी कलेक्शन एंट्री",
+    home: "होम",
+    search: "खोजें",
+    entry: "एंट्री",
+    settings: "सेटिंग",
+    history: "इतिहास",
+    historyTitle: "📋 इतिहास (History)",
+    save: "सहेजें",
+    saving: "सहेज रहे हैं...",
+    show: "दिखाएं",
+    clearAll: "🗑 साफ करें",
+    searchAndAdd: "नंबर खोजें और जोड़ें",
+    add: "✚ जोड़ें",
+    delete: "🗑 हटाएं",
+    close: "✕ बंद करें",
+    selectGame: "🎮 गेम चुनें",
+    whichGame: "कौन सा गेम खोलना है?",
+    party: "पार्टी",
+    date: "तारीख",
+    game: "गेम",
+    cutting: "कटिंग",
+    grandTotal: "Grand Total",
+    total: "कुल",
+    topBA: "ऊपर B/A",
+    bottomBA: "नीचे B/A",
+    searchNumber: "नंबर खोजें और जोड़ें",
+    currentAmount: "का अभी का amount:",
+    addAmount: "जोड़ने की राशि:",
+    addAmountPlaceholder: "राशि डालें",
+    saved: "Data save ho gaya!",
+    confirmClear: "क्या आप सभी amount साफ करना चाहते हैं?",
+    noHistory: "कोई इतिहास नहीं",
+    gameHistory: "गेम की",
+    backendLoading: "बैकएंड से लोड हो रहा है...",
+    backendData: "📦 बैकएंड से सेव डेटा:",
+    openGame: "खोलें →",
+    changeGame: "← गेम बदलें",
+    gameOpen: "खुला है",
+    todayInfo: "आज की जानकारी",
+    numbersFilled: "नंबर भरे हुए हैं",
+    fullGrid: "100 नंबर का पूरा grid, B/A sections",
+    recentHistory: "की हाल की history:",
+    numberInput: "नंबर डालें (1 से 100):",
+    numberPlaceholder: "जैसे: 25",
+    active: "✓ चल रहा",
+    searchAddLabel: "🔍 खोजें+जोड़ें:",
+    selectParty: "Select Party:",
+    partyPlaceholder: "Party name...",
+    pattiSale: "PATTI SALE",
+    userFilter: "USER FILTER",
+    allUsers: "All Users",
+    selectedUsers: "Selected Users",
+    timeCol: "समय",
+    partyCol: "पार्टी",
+    totalCol: "कुल",
+    deleteCol: "हटाएं",
+    entries: "entries",
+    language: "भाषा / Language",
+    hindi: "हिंदी (Hindi)",
+    english: "English",
+    settingsTitle: "⚙️ सेटिंग",
+    langHi: "हिंदी",
+    langEn: "अंग्रेजी",
+    invalidNumber: "Sahi number daalen (1 se 100 ke beech)",
+    enterAmount: "Add karne ki amount daalen",
+    addedSuccess: "mein add ho gaya!",
+    deleteSuccess: "Record delete ho gaya!",
+    deleteFail: "Delete nahi hua, dobara try karein",
+    enterParty: "Party name daalen",
+    dataLoaded: "Data load ho gaya!",
+    noData: "Koi data nahi mila",
+    backendError: "Backend se connect nahi hua",
+    backendConnectError: "Backend connect nahi hua",
+    doEntry: "Entry करें",
+  },
+  en: {
+    appTitle: "Lottery Collection Entry",
+    home: "Home",
+    search: "Search",
+    entry: "Entry",
+    settings: "Settings",
+    history: "History",
+    historyTitle: "📋 History",
+    save: "Save",
+    saving: "Saving...",
+    show: "Show",
+    clearAll: "🗑 Clear All",
+    searchAndAdd: "Search & Add Number",
+    add: "✚ Add",
+    delete: "🗑 Delete",
+    close: "✕ Close",
+    selectGame: "🎮 Select Game",
+    whichGame: "Which game do you want to open?",
+    party: "Party",
+    date: "Date",
+    game: "Game",
+    cutting: "Cutting",
+    grandTotal: "Grand Total",
+    total: "Total",
+    topBA: "Top B/A",
+    bottomBA: "Bottom B/A",
+    searchNumber: "Search & Add Number",
+    currentAmount: "current amount:",
+    addAmount: "Add Amount:",
+    addAmountPlaceholder: "Enter amount",
+    saved: "Data saved!",
+    confirmClear: "Do you want to clear all amounts?",
+    noHistory: "No History",
+    gameHistory: "game",
+    backendLoading: "Loading from backend...",
+    backendData: "📦 Backend Saved Data:",
+    openGame: "Open →",
+    changeGame: "← Change Game",
+    gameOpen: "Open",
+    todayInfo: "Today's Info",
+    numbersFilled: "numbers filled",
+    fullGrid: "Full 100 number grid, B/A sections",
+    recentHistory: "recent history:",
+    numberInput: "Enter number (1 to 100):",
+    numberPlaceholder: "e.g.: 25",
+    active: "✓ Active",
+    searchAddLabel: "🔍 Search+Add:",
+    selectParty: "Select Party:",
+    partyPlaceholder: "Party name...",
+    pattiSale: "PATTI SALE",
+    userFilter: "USER FILTER",
+    allUsers: "All Users",
+    selectedUsers: "Selected Users",
+    timeCol: "Time",
+    partyCol: "Party",
+    totalCol: "Total",
+    deleteCol: "Delete",
+    entries: "entries",
+    language: "Language / भाषा",
+    hindi: "हिंदी (Hindi)",
+    english: "English",
+    settingsTitle: "⚙️ Settings",
+    langHi: "Hindi",
+    langEn: "English",
+    invalidNumber: "Please enter a valid number (1 to 100)",
+    enterAmount: "Please enter amount to add",
+    addedSuccess: "added to number",
+    deleteSuccess: "Record deleted!",
+    deleteFail: "Delete failed, please try again",
+    enterParty: "Please enter party name",
+    dataLoaded: "Data loaded!",
+    noData: "No data found",
+    backendError: "Backend not connected",
+    backendConnectError: "Backend not connected",
+    doEntry: "Do Entry",
+  },
+} as const;
+
+type Lang = "hi" | "en";
+
+const GAME_COLORS: Record<
+  string,
+  { bg: string; border: string; text: string; light: string }
+> = {
+  DS: { bg: "#003366", border: "#001133", text: "#66aaff", light: "#e8f0ff" },
+  FB: { bg: "#006600", border: "#003300", text: "#66cc66", light: "#e8ffe8" },
+  GB: { bg: "#cc6600", border: "#883300", text: "#ffcc66", light: "#fff3e0" },
+  GL: { bg: "#660066", border: "#330033", text: "#cc88cc", light: "#ffe8ff" },
+};
+
+interface GameData {
+  values: string[];
+  bValues: string[];
+  aValues: string[];
+  party: string;
+  pattiSale: boolean;
+  radioOption: string;
+  cuttingType: "decrease" | "increase";
+  cuttingAmount: string;
+  cuttingPercentage: string;
+  multiplyN: string;
+}
 
 interface LocalHistoryEntry {
   date: string;
@@ -43,10 +226,64 @@ interface FormState {
   highColor: boolean;
 }
 
-type Screen = "home" | "search" | "entry";
+type Screen = "gameselect" | "home" | "search" | "entry" | "settings";
 
 function todayStr(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+function defaultGameData(): GameData {
+  return {
+    values: Array(100).fill(""),
+    bValues: Array(10).fill(""),
+    aValues: Array(10).fill(""),
+    party: "",
+    pattiSale: false,
+    radioOption: "Daily Collection",
+    cuttingType: "decrease",
+    cuttingAmount: "",
+    cuttingPercentage: "",
+    multiplyN: "",
+  };
+}
+
+function loadGameDataMap(): Record<string, GameData> {
+  try {
+    const raw = localStorage.getItem(LS_GAME_DATA_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as Record<string, Partial<GameData>>;
+      const result: Record<string, GameData> = {};
+      for (const g of GAMES) {
+        const p = parsed[g] ?? {};
+        result[g] = {
+          values: p.values ?? Array(100).fill(""),
+          bValues: p.bValues ?? Array(10).fill(""),
+          aValues: p.aValues ?? Array(10).fill(""),
+          party: p.party ?? "",
+          pattiSale: p.pattiSale ?? false,
+          radioOption: p.radioOption ?? "Daily Collection",
+          cuttingType: p.cuttingType ?? "decrease",
+          cuttingAmount: p.cuttingAmount ?? "",
+          cuttingPercentage: p.cuttingPercentage ?? "",
+          multiplyN: p.multiplyN ?? "",
+        };
+      }
+      return result;
+    }
+  } catch {
+    // ignore
+  }
+  const result: Record<string, GameData> = {};
+  for (const g of GAMES) result[g] = defaultGameData();
+  return result;
+}
+
+function saveGameDataMap(map: Record<string, GameData>) {
+  try {
+    localStorage.setItem(LS_GAME_DATA_KEY, JSON.stringify(map));
+  } catch {
+    // ignore
+  }
 }
 
 function loadFormState(): FormState {
@@ -121,13 +358,8 @@ function dateToTime(dateStr: string): bigint {
   return BigInt(new Date(dateStr).getTime() * 1_000_000);
 }
 
-function nsToDateStr(ns: bigint): string {
-  const ms = Number(ns) / 1_000_000;
-  return new Date(ms).toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
+function calcGrandTotal(gd: GameData): number {
+  return gd.values.reduce((s, v) => s + toNum(v), 0);
 }
 
 export default function App() {
@@ -138,7 +370,12 @@ export default function App() {
 
   const initialForm = useMemo(() => loadFormState(), []);
 
-  const [screen, setScreen] = useState<Screen>("home");
+  // Per-game data map
+  const [gameDataMap, setGameDataMap] = useState<Record<string, GameData>>(() =>
+    loadGameDataMap(),
+  );
+
+  const [screen, setScreen] = useState<Screen>("gameselect");
   const [date, setDate] = useState(initialForm.date);
   const [game, setGame] = useState(initialForm.game);
   const [radioOption, setRadioOption] = useState(initialForm.radioOption);
@@ -157,6 +394,15 @@ export default function App() {
   );
   const [multiplyN, setMultiplyN] = useState(initialForm.multiplyN);
   const [highColor, setHighColor] = useState(initialForm.highColor);
+  const [language, setLanguage] = useState<Lang>(() => {
+    const stored = localStorage.getItem(LS_LANG_KEY);
+    return stored === "hi" || stored === "en" ? stored : "hi";
+  });
+  const t = TRANSLATIONS[language];
+  const changeLanguage = (lang: Lang) => {
+    setLanguage(lang);
+    localStorage.setItem(LS_LANG_KEY, lang);
+  };
   const [showHistory, setShowHistory] = useState(false);
   const [historyGameTab, setHistoryGameTab] = useState<string>("DS");
   const [localHistory, setLocalHistory] = useState<LocalHistoryEntry[]>(() =>
@@ -166,6 +412,119 @@ export default function App() {
   // Search + Add state
   const [searchNum, setSearchNum] = useState("");
   const [addAmount, setAddAmount] = useState("");
+
+  // Track previous game to save/load on change
+  const prevGameRef = useRef(game);
+  // Keep a ref of current values so we can snapshot without deps
+  const currentFieldsRef = useRef<GameData>({
+    values,
+    bValues,
+    aValues,
+    party,
+    pattiSale,
+    radioOption,
+    cuttingType,
+    cuttingAmount,
+    cuttingPercentage,
+    multiplyN,
+  });
+  useEffect(() => {
+    currentFieldsRef.current = {
+      values,
+      bValues,
+      aValues,
+      party,
+      pattiSale,
+      radioOption,
+      cuttingType,
+      cuttingAmount,
+      cuttingPercentage,
+      multiplyN,
+    };
+  }, [
+    values,
+    bValues,
+    aValues,
+    party,
+    pattiSale,
+    radioOption,
+    cuttingType,
+    cuttingAmount,
+    cuttingPercentage,
+    multiplyN,
+  ]);
+
+  // When game changes, save current data to map and load new game data
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally only trigger on game change
+  useEffect(() => {
+    const prevGame = prevGameRef.current;
+    if (prevGame === game) return;
+    // Save current game data using ref snapshot (no stale closure)
+    const snapshot = currentFieldsRef.current;
+    setGameDataMap((prev) => {
+      const updated = {
+        ...prev,
+        [prevGame]: snapshot,
+      };
+      saveGameDataMap(updated);
+      return updated;
+    });
+    // Load new game data
+    const newGameData = gameDataMap[game] ?? defaultGameData();
+    setValues(newGameData.values);
+    setBValues(newGameData.bValues);
+    setAValues(newGameData.aValues);
+    setParty(newGameData.party);
+    setPattiSale(newGameData.pattiSale);
+    setRadioOption(newGameData.radioOption);
+    setCuttingType(newGameData.cuttingType);
+    setCuttingAmount(newGameData.cuttingAmount);
+    setCuttingPercentage(newGameData.cuttingPercentage);
+    setMultiplyN(newGameData.multiplyN);
+    prevGameRef.current = game;
+  }, [game]);
+
+  // Auto-save current game data to map whenever values change
+  const gameDataSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (gameDataSaveTimer.current) clearTimeout(gameDataSaveTimer.current);
+    gameDataSaveTimer.current = setTimeout(() => {
+      setGameDataMap((prev) => {
+        const updated = {
+          ...prev,
+          [game]: {
+            values,
+            bValues,
+            aValues,
+            party,
+            pattiSale,
+            radioOption,
+            cuttingType,
+            cuttingAmount,
+            cuttingPercentage,
+            multiplyN,
+          },
+        };
+        saveGameDataMap(updated);
+        return updated;
+      });
+    }, 500);
+    return () => {
+      if (gameDataSaveTimer.current) clearTimeout(gameDataSaveTimer.current);
+    };
+  }, [
+    game,
+    values,
+    bValues,
+    aValues,
+    party,
+    pattiSale,
+    radioOption,
+    cuttingType,
+    cuttingAmount,
+    cuttingPercentage,
+    multiplyN,
+  ]);
 
   // Auto-save form state to localStorage on every change (debounced)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -230,12 +589,12 @@ export default function App() {
 
   const handleSearchAdd = useCallback(() => {
     if (searchIndex < 0) {
-      toast.error("Sahi number daalen (1 se 100 ke beech)");
+      toast.error(t.invalidNumber);
       return;
     }
     const addVal = toNum(addAmount);
     if (addVal === 0) {
-      toast.error("Add karne ki amount daalen");
+      toast.error(t.enterAmount);
       return;
     }
     setValues((prev) => {
@@ -244,10 +603,10 @@ export default function App() {
       next[searchIndex] = String(current + addVal);
       return next;
     });
-    toast.success(`Number ${searchNum} mein ${addVal} add ho gaya!`);
+    toast.success(`${searchNum} ${t.addedSuccess} ${addVal}!`);
     setAddAmount("");
     setSearchNum("");
-  }, [searchIndex, addAmount, searchNum]);
+  }, [searchIndex, addAmount, searchNum, t]);
 
   const rowTotals = useMemo(() => {
     return ROWS.map((row) =>
@@ -332,19 +691,19 @@ export default function App() {
       game: g,
       party: p,
     }: { date: bigint; game: string; party: string }) => {
-      if (!actor) throw new Error("Backend connect nahi hua");
+      if (!actor) throw new Error(t.backendConnectError);
       await actor.deleteData(d, g, p);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["history"] });
-      toast.success("Record delete ho gaya!");
+      toast.success(t.deleteSuccess);
     },
     onError: () => toast.error("Delete nahi hua, dobara try karein"),
   });
 
   const handleShow = async () => {
     if (!party) {
-      toast.error("Party name daalen");
+      toast.error(t.enterParty);
       return;
     }
     const result = await fetchByParty();
@@ -388,7 +747,7 @@ export default function App() {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      if (!actor) throw new Error("Backend se connect nahi hua");
+      if (!actor) throw new Error(t.backendError);
       await actor.saveData(
         dateToTime(date),
         game,
@@ -403,7 +762,7 @@ export default function App() {
       );
     },
     onSuccess: () => {
-      toast.success("Data save ho gaya!");
+      toast.success(t.saved);
       const newEntry: LocalHistoryEntry = {
         date,
         game,
@@ -425,19 +784,22 @@ export default function App() {
     onError: (e) => toast.error(`Save nahi hua: ${e}`),
   });
 
-  const deleteLocalEntry = useCallback((entry: LocalHistoryEntry) => {
-    setLocalHistory((prev) =>
-      prev.filter(
-        (e) =>
-          !(
-            e.date === entry.date &&
-            e.game === entry.game &&
-            e.party === entry.party
-          ),
-      ),
-    );
-    toast.success("Record delete ho gaya!");
-  }, []);
+  const deleteLocalEntry = useCallback(
+    (entry: LocalHistoryEntry) => {
+      setLocalHistory((prev) =>
+        prev.filter(
+          (e) =>
+            !(
+              e.date === entry.date &&
+              e.game === entry.game &&
+              e.party === entry.party
+            ),
+        ),
+      );
+      toast.success(t.deleteSuccess);
+    },
+    [t],
+  );
 
   // Filtered local history for current tab, grouped by date
   const filteredLocalHistory = useMemo(
@@ -467,6 +829,63 @@ export default function App() {
     year: "numeric",
   });
 
+  // Select a game from the game select screen
+  const handleSelectGame = useCallback(
+    (selectedGame: string) => {
+      // Save current game data first
+      setGameDataMap((prev) => {
+        const updated = {
+          ...prev,
+          [game]: {
+            values,
+            bValues,
+            aValues,
+            party,
+            pattiSale,
+            radioOption,
+            cuttingType,
+            cuttingAmount,
+            cuttingPercentage,
+            multiplyN,
+          },
+        };
+        saveGameDataMap(updated);
+        return updated;
+      });
+      // Load new game
+      const newGameData = gameDataMap[selectedGame] ?? defaultGameData();
+      setValues(newGameData.values);
+      setBValues(newGameData.bValues);
+      setAValues(newGameData.aValues);
+      setParty(newGameData.party);
+      setPattiSale(newGameData.pattiSale);
+      setRadioOption(newGameData.radioOption);
+      setCuttingType(newGameData.cuttingType);
+      setCuttingAmount(newGameData.cuttingAmount);
+      setCuttingPercentage(newGameData.cuttingPercentage);
+      setMultiplyN(newGameData.multiplyN);
+      prevGameRef.current = selectedGame;
+      setGame(selectedGame);
+      setScreen("home");
+    },
+    [
+      game,
+      values,
+      bValues,
+      aValues,
+      party,
+      pattiSale,
+      radioOption,
+      cuttingType,
+      cuttingAmount,
+      cuttingPercentage,
+      multiplyN,
+      gameDataMap,
+    ],
+  );
+
+  const gameColor = GAME_COLORS[game] ?? GAME_COLORS.DS;
+
   return (
     <div className="min-h-screen bg-[#f0f0f0] font-mono text-xs w-full flex flex-col">
       <Toaster />
@@ -475,13 +894,25 @@ export default function App() {
       <div className="bg-[#003366] text-white px-3 py-1 flex items-center justify-between flex-shrink-0">
         <button
           type="button"
-          onClick={() => setScreen("home")}
+          onClick={() => setScreen("gameselect")}
           className="font-bold text-sm hover:text-[#ffcc44] transition-colors"
           data-ocid="nav.home.link"
         >
           Lottery Collection Entry
         </button>
         <div className="flex items-center gap-2">
+          {screen !== "gameselect" && (
+            <span
+              className="text-[11px] font-bold px-2 py-0.5 rounded-sm border"
+              style={{
+                backgroundColor: gameColor.bg,
+                borderColor: gameColor.border,
+                color: gameColor.text,
+              }}
+            >
+              🎮 {game}
+            </span>
+          )}
           <button
             type="button"
             onClick={() => {
@@ -491,9 +922,9 @@ export default function App() {
             className="bg-[#cc8800] hover:bg-[#ffaa00] text-white text-[11px] font-bold px-3 py-0.5 border border-[#ffcc44] rounded-sm transition-colors"
             data-ocid="history.open_modal_button"
           >
-            📋 इतिहास
+            {t.history}
           </button>
-          <span className="text-[10px] opacity-70">v3.0</span>
+          <span className="text-[10px] opacity-70">v4.0</span>
         </div>
       </div>
 
@@ -505,14 +936,14 @@ export default function App() {
         >
           <div className="bg-white w-full max-w-2xl my-4 mx-2 shadow-2xl rounded-sm">
             <div className="bg-[#003366] text-white px-4 py-2 flex items-center justify-between">
-              <span className="font-bold text-sm">📋 इतिहास (History)</span>
+              <span className="font-bold text-sm">{t.historyTitle}</span>
               <button
                 type="button"
                 onClick={() => setShowHistory(false)}
                 className="text-white hover:text-[#ffcc44] text-lg font-bold leading-none px-1"
                 data-ocid="history.close_button"
               >
-                ✕ बंद करें
+                {t.close}
               </button>
             </div>
             <div className="flex border-b-2 border-[#003366] bg-[#e8eef8]">
@@ -538,7 +969,7 @@ export default function App() {
                   className="text-center py-2 text-[#003366] font-bold text-[11px] mb-2"
                   data-ocid="history.loading_state"
                 >
-                  बैकएंड से लोड हो रहा है...
+                  {t.backendLoading}
                 </div>
               )}
               {groupedLocalHistory.length > 0 ? (
@@ -607,7 +1038,7 @@ export default function App() {
                                   className="bg-[#cc0000] hover:bg-[#ee0000] text-white px-2 py-0.5 text-[10px] font-bold border border-[#880000]"
                                   data-ocid={`history.delete_button.${idx + 1}`}
                                 >
-                                  🗑 हटाएं
+                                  {t.delete}
                                 </button>
                               </td>
                             </tr>
@@ -632,7 +1063,7 @@ export default function App() {
               {historyData && historyData.length > 0 && (
                 <div className="mt-4 border-t-2 border-dashed border-[#c0c0c0] pt-3">
                   <div className="text-[11px] font-bold text-[#003366] mb-2">
-                    📦 बैकएंड से सेव डेटा:
+                    {t.backendData}
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full border-collapse text-[11px]">
@@ -656,50 +1087,53 @@ export default function App() {
                         </tr>
                       </thead>
                       <tbody>
-                        {historyData.map((entry, idx) => {
-                          const total = entry.numbers.reduce(
-                            (s, v) => s + Number(v),
-                            0,
-                          );
-                          return (
-                            <tr
-                              key={`${entry.date}-${entry.game}-${entry.party}`}
-                              className={
-                                idx % 2 === 0 ? "bg-white" : "bg-[#f5f8ff]"
-                              }
-                            >
-                              <td className="border border-[#c0c0c0] px-2 py-1">
-                                {nsToDateStr(entry.date)}
-                              </td>
-                              <td className="border border-[#c0c0c0] px-2 py-1 font-bold text-[#003366]">
-                                {entry.game}
-                              </td>
-                              <td className="border border-[#c0c0c0] px-2 py-1">
-                                {entry.party || "-"}
-                              </td>
-                              <td className="border border-[#c0c0c0] px-2 py-1 text-right font-bold text-[#cc0000]">
-                                {total.toLocaleString("en-IN")}
-                              </td>
-                              <td className="border border-[#c0c0c0] px-2 py-1 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    deleteMutation.mutate({
-                                      date: entry.date,
-                                      game: entry.game,
-                                      party: entry.party,
-                                    })
-                                  }
-                                  disabled={deleteMutation.isPending}
-                                  className="bg-[#cc0000] hover:bg-[#ee0000] text-white px-2 py-0.5 text-[10px] font-bold border border-[#880000] disabled:opacity-50"
-                                  data-ocid={`history.delete_button.${idx + 1}`}
-                                >
-                                  🗑 हटाएं
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        })}
+                        {historyData
+                          .filter((e) => e.game === historyGameTab)
+                          .map((entry, idx) => {
+                            const total = entry.numbers.reduce(
+                              (s, v) => s + Number(v),
+                              0,
+                            );
+                            return (
+                              <tr
+                                key={`be-${String(entry.date)}-${entry.game}-${entry.party}`}
+                                className={
+                                  idx % 2 === 0 ? "bg-white" : "bg-[#f5f8ff]"
+                                }
+                              >
+                                <td className="border border-[#c0c0c0] px-2 py-1">
+                                  {new Date(
+                                    Number(entry.date) / 1_000_000,
+                                  ).toLocaleDateString("en-IN")}
+                                </td>
+                                <td className="border border-[#c0c0c0] px-2 py-1 font-bold">
+                                  {entry.game}
+                                </td>
+                                <td className="border border-[#c0c0c0] px-2 py-1">
+                                  {entry.party || "-"}
+                                </td>
+                                <td className="border border-[#c0c0c0] px-2 py-1 text-right font-bold text-[#cc0000]">
+                                  {total.toLocaleString("en-IN")}
+                                </td>
+                                <td className="border border-[#c0c0c0] px-2 py-1 text-center">
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      deleteMutation.mutate({
+                                        date: entry.date,
+                                        game: entry.game,
+                                        party: entry.party,
+                                      })
+                                    }
+                                    className="bg-[#cc0000] hover:bg-[#ee0000] text-white px-2 py-0.5 text-[10px] font-bold border border-[#880000]"
+                                    data-ocid={`history.delete_button.${idx + 1}`}
+                                  >
+                                    {t.delete}
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
                       </tbody>
                     </table>
                   </div>
@@ -710,28 +1144,132 @@ export default function App() {
         </div>
       )}
 
-      {/* ===== SCREEN CONTENT ===== */}
+      {/* ===== MAIN CONTENT ===== */}
       <div className="flex-1 overflow-y-auto pb-16">
+        {/* ===== GAME SELECT SCREEN ===== */}
+        {screen === "gameselect" && (
+          <div className="p-4" data-ocid="gameselect.section">
+            <div className="text-center mb-6">
+              <div className="text-[22px] font-bold text-[#003366] mb-1">
+                {t.selectGame}
+              </div>
+              <div className="text-[12px] text-[#666]">{t.whichGame}</div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {GAMES.map((g) => {
+                const gc = GAME_COLORS[g];
+                const gd = gameDataMap[g] ?? defaultGameData();
+                const gt = calcGrandTotal(gd);
+                const isActive = game === g;
+                return (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() => handleSelectGame(g)}
+                    className="relative flex flex-col items-center justify-center rounded-sm shadow-lg border-4 p-6 active:opacity-90 transition-all min-h-[160px]"
+                    style={{
+                      backgroundColor: gc.bg,
+                      borderColor: isActive ? "#ffcc44" : gc.border,
+                    }}
+                    data-ocid={`gameselect.${g.toLowerCase()}.button`}
+                  >
+                    {isActive && (
+                      <span className="absolute top-2 right-2 bg-[#ffcc44] text-[#003366] text-[9px] font-bold px-1.5 py-0.5 rounded-sm">
+                        {t.active}
+                      </span>
+                    )}
+                    <div
+                      className="text-[48px] font-bold leading-none mb-2"
+                      style={{ color: gc.text }}
+                    >
+                      {g}
+                    </div>
+                    <div className="text-white text-[11px] opacity-80 mb-1">
+                      {g === "DS" && (language === "hi" ? "डी एस" : "DS")}
+                      {g === "FB" && (language === "hi" ? "एफ बी" : "FB")}
+                      {g === "GB" && (language === "hi" ? "जी बी" : "GB")}
+                      {g === "GL" && (language === "hi" ? "जी एल" : "GL")}
+                    </div>
+                    <div className="mt-2 bg-black/30 rounded-sm px-3 py-1 text-center">
+                      <div className="text-[9px] text-white opacity-70">
+                        Grand Total
+                      </div>
+                      <div
+                        className="text-[18px] font-bold leading-tight"
+                        style={{ color: gt > 0 ? "#ffcc44" : "#ffffff99" }}
+                      >
+                        {gt > 0 ? gt.toLocaleString("en-IN") : "0"}
+                      </div>
+                    </div>
+                    <div
+                      className="mt-3 text-[12px] font-bold px-4 py-1 rounded-sm"
+                      style={{ backgroundColor: gc.text, color: gc.bg }}
+                    >
+                      {t.openGame}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <footer className="text-center text-[10px] text-[#666] py-4 mt-6 border-t border-[#c0c0c0]">
+              © {currentYear}. Built with ❤️ using{" "}
+              <a
+                href={`https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${hostname}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#003366] hover:underline"
+              >
+                caffeine.ai
+              </a>
+            </footer>
+          </div>
+        )}
+
         {/* ===== HOME SCREEN ===== */}
         {screen === "home" && (
           <div className="p-4" data-ocid="home.section">
+            {/* Game Badge + Back */}
+            <div className="flex items-center gap-2 mb-3">
+              <button
+                type="button"
+                onClick={() => setScreen("gameselect")}
+                className="flex items-center gap-1 bg-white border border-[#c0c0c0] text-[11px] font-bold px-2 py-1 rounded-sm hover:bg-[#f0f0f0] transition-colors"
+                data-ocid="home.gameselect.button"
+              >
+                {t.changeGame}
+              </button>
+              <span
+                className="text-[13px] font-bold px-3 py-1 rounded-sm"
+                style={{ backgroundColor: gameColor.bg, color: gameColor.text }}
+              >
+                🎮 {game} — {t.gameOpen}
+              </span>
+            </div>
+
             {/* Summary Card */}
-            <div className="bg-[#003366] text-white rounded-sm p-3 mb-4 shadow">
-              <div className="text-[11px] opacity-75 mb-1">आज की जानकारी</div>
+            <div
+              className="text-white rounded-sm p-3 mb-4 shadow"
+              style={{ backgroundColor: gameColor.bg }}
+            >
+              <div className="text-[11px] opacity-75 mb-1">{t.todayInfo}</div>
               <div className="flex flex-wrap gap-4 items-center">
                 <div>
-                  <span className="text-[10px] opacity-60">तारीख: </span>
+                  <span className="text-[10px] opacity-60">{t.date}: </span>
                   <span className="font-bold text-[12px]">{todayDisplay}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] opacity-60">गेम: </span>
-                  <span className="font-bold text-[14px] text-[#ffcc44]">
+                  <span className="text-[10px] opacity-60">{t.game}: </span>
+                  <span
+                    className="font-bold text-[14px]"
+                    style={{ color: gameColor.text }}
+                  >
                     {game}
                   </span>
                 </div>
                 {party && (
                   <div>
-                    <span className="text-[10px] opacity-60">पार्टी: </span>
+                    <span className="text-[10px] opacity-60">{t.party}: </span>
                     <span className="font-bold text-[12px]">{party}</span>
                   </div>
                 )}
@@ -754,27 +1292,33 @@ export default function App() {
               >
                 <div className="text-3xl mb-2">🔍</div>
                 <div className="font-bold text-lg leading-tight">
-                  नंबर खोजें और जोड़ें
+                  {t.searchNumber}
                 </div>
                 <div className="text-[12px] opacity-80 mt-1">
-                  किसी भी नंबर (1-100) में amount जोड़ें
+                  {language === "hi"
+                    ? "किसी भी नंबर (1-100) में amount जोड़ें"
+                    : "Add amount to any number (1-100)"}
                 </div>
                 <div className="mt-3 text-[11px] bg-black/20 inline-block px-2 py-1 rounded-sm">
-                  {nonZeroEntries.length} नंबर भरे हुए हैं
+                  {nonZeroEntries.length} {t.numbersFilled}
                 </div>
               </button>
 
               <button
                 type="button"
                 onClick={() => setScreen("entry")}
-                className="w-full bg-gradient-to-br from-[#003366] to-[#0055aa] text-white rounded-sm shadow-lg border-2 border-[#001133] p-6 text-left active:opacity-90 hover:from-[#004477] hover:to-[#0066bb] transition-all"
+                className="w-full text-white rounded-sm shadow-lg border-2 p-6 text-left active:opacity-90 transition-all"
+                style={{
+                  background: `linear-gradient(135deg, ${gameColor.bg}, ${gameColor.bg}dd)`,
+                  borderColor: gameColor.border,
+                }}
                 data-ocid="home.entry.button"
               >
                 <div className="text-3xl mb-2">📝</div>
-                <div className="font-bold text-lg leading-tight">Entry करें</div>
-                <div className="text-[12px] opacity-80 mt-1">
-                  100 नंबर का पूरा grid, B/A sections
+                <div className="font-bold text-lg leading-tight">
+                  {t.doEntry}
                 </div>
+                <div className="text-[12px] opacity-80 mt-1">{t.fullGrid}</div>
                 <div className="mt-3 text-[11px] bg-black/20 inline-block px-2 py-1 rounded-sm">
                   Grand Total: {grandTotal.toLocaleString("en-IN")}
                 </div>
@@ -782,36 +1326,42 @@ export default function App() {
             </div>
 
             {/* Recent History Quick View */}
-            {localHistory.length > 0 && (
+            {localHistory.filter((e) => e.game === game).length > 0 && (
               <div className="mt-4">
                 <div className="text-[11px] font-bold text-[#003366] mb-2">
-                  🕐 हाल की history:
+                  🕐 {game} {t.recentHistory}
                 </div>
                 <div className="bg-white border border-[#c0c0c0] rounded-sm overflow-hidden">
-                  {localHistory.slice(0, 5).map((entry, idx) => (
-                    <div
-                      key={`${entry.date}-${entry.game}-${entry.savedAt}`}
-                      className={`flex items-center justify-between px-3 py-2 border-b border-[#eee] last:border-b-0 ${
-                        idx % 2 === 0 ? "bg-white" : "bg-[#f8f8f8]"
-                      }`}
-                      data-ocid={`home.history.item.${idx + 1}`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="bg-[#003366] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm">
-                          {entry.game}
-                        </span>
-                        <span className="text-[11px] text-[#555]">
-                          {entry.party || "—"}
-                        </span>
-                        <span className="text-[10px] text-[#999]">
-                          {entry.date}
+                  {localHistory
+                    .filter((e) => e.game === game)
+                    .slice(0, 5)
+                    .map((entry, idx) => (
+                      <div
+                        key={`${entry.date}-${entry.game}-${entry.savedAt}`}
+                        className={`flex items-center justify-between px-3 py-1.5 border-b border-[#eee] ${
+                          idx % 2 === 0 ? "bg-white" : "bg-[#f8f8f8]"
+                        }`}
+                        data-ocid={`home.history.item.${idx + 1}`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm"
+                            style={{ backgroundColor: gameColor.bg }}
+                          >
+                            {entry.game}
+                          </span>
+                          <span className="text-[11px] text-[#555]">
+                            {entry.party || "—"}
+                          </span>
+                          <span className="text-[10px] text-[#999]">
+                            {entry.date}
+                          </span>
+                        </div>
+                        <span className="font-bold text-[12px] text-[#cc0000]">
+                          {entry.grandTotal.toLocaleString("en-IN")}
                         </span>
                       </div>
-                      <span className="font-bold text-[12px] text-[#cc0000]">
-                        {entry.grandTotal.toLocaleString("en-IN")}
-                      </span>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </div>
             )}
@@ -821,9 +1371,25 @@ export default function App() {
         {/* ===== SEARCH SCREEN ===== */}
         {screen === "search" && (
           <div className="p-3" data-ocid="search.section">
+            <div className="flex items-center gap-2 mb-3">
+              <button
+                type="button"
+                onClick={() => setScreen("gameselect")}
+                className="flex items-center gap-1 bg-[#003366] text-white text-[12px] font-bold px-3 py-1.5 rounded-sm hover:bg-[#004488] active:opacity-80 transition-colors"
+                data-ocid="search.home_button"
+              >
+                {t.home}
+              </button>
+              <span
+                className="text-[12px] font-bold px-3 py-1 rounded-sm"
+                style={{ backgroundColor: gameColor.bg, color: gameColor.text }}
+              >
+                {game}
+              </span>
+            </div>
             <div className="bg-[#fffbe6] border-2 border-[#cc8800] rounded-sm p-4 mb-4">
               <div className="text-[14px] font-bold text-[#cc6600] mb-4">
-                🔍 नंबर खोजें और जोड़ें
+                🔍 {t.searchNumber}
               </div>
 
               {/* Number Input */}
@@ -832,7 +1398,7 @@ export default function App() {
                   htmlFor="search-num-page"
                   className="block text-[11px] font-bold text-[#663300] mb-1"
                 >
-                  नंबर डालें (1 से 100):
+                  {t.numberInput}
                 </label>
                 <input
                   id="search-num-page"
@@ -843,7 +1409,7 @@ export default function App() {
                     if (/^\d{0,3}$/.test(e.target.value))
                       setSearchNum(e.target.value);
                   }}
-                  placeholder="जैसे: 25"
+                  placeholder={t.numberPlaceholder}
                   className="w-full border-2 border-[#cc8800] bg-white px-3 py-2 text-[18px] font-bold text-center focus:outline-none focus:border-[#cc6600]"
                   data-ocid="search.number.input"
                 />
@@ -853,7 +1419,7 @@ export default function App() {
               {searchCurrentValue !== null && (
                 <div className="mb-3 bg-[#fff3cd] border border-[#cc8800] rounded-sm p-3 text-center">
                   <div className="text-[11px] text-[#663300] mb-1">
-                    नंबर {searchNum} का अभी का amount:
+                    {t.search} {searchNum} {t.currentAmount}
                   </div>
                   <div
                     className="text-[32px] font-bold text-[#cc0000] leading-none"
@@ -870,7 +1436,7 @@ export default function App() {
                   htmlFor="add-amount-page"
                   className="block text-[11px] font-bold text-[#004400] mb-1"
                 >
-                  Add Amount (जोड़ने की राशि):
+                  {t.addAmount}
                 </label>
                 <input
                   id="add-amount-page"
@@ -881,7 +1447,7 @@ export default function App() {
                     if (/^\d*$/.test(e.target.value))
                       setAddAmount(e.target.value);
                   }}
-                  placeholder="राशि डालें"
+                  placeholder={t.addAmountPlaceholder}
                   className="w-full border-2 border-[#006600] bg-white px-3 py-2 text-[18px] font-bold text-center focus:outline-none focus:border-[#004400]"
                   data-ocid="search.amount.input"
                 />
@@ -920,14 +1486,16 @@ export default function App() {
             {/* All Non-Zero Numbers List */}
             <div className="bg-white border border-[#c0c0c0] rounded-sm">
               <div className="bg-[#003366] text-white px-3 py-2 text-[12px] font-bold">
-                📋 भरे हुए नंबर ({nonZeroEntries.length})
+                📋 {t.numbersFilled} ({nonZeroEntries.length})
               </div>
               {nonZeroEntries.length === 0 ? (
                 <div
                   className="text-center py-6 text-[#999] text-[12px]"
                   data-ocid="search.empty_state"
                 >
-                  अभी कोई नंबर नहीं भरा
+                  {language === "hi"
+                    ? "अभी कोई नंबर नहीं भरा"
+                    : "No numbers filled yet"}
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-0">
@@ -956,6 +1524,22 @@ export default function App() {
         {/* ===== ENTRY SCREEN ===== */}
         {screen === "entry" && (
           <div className="p-2 w-full" data-ocid="entry.section">
+            <div className="flex items-center gap-2 mb-2">
+              <button
+                type="button"
+                onClick={() => setScreen("gameselect")}
+                className="flex items-center gap-1 bg-[#003366] text-white text-[12px] font-bold px-3 py-1.5 rounded-sm hover:bg-[#004488] active:opacity-80 transition-colors"
+                data-ocid="entry.home_button"
+              >
+                🏠 होम
+              </button>
+              <span
+                className="text-[12px] font-bold px-3 py-1 rounded-sm"
+                style={{ backgroundColor: gameColor.bg, color: gameColor.text }}
+              >
+                🎮 {game}
+              </span>
+            </div>
             {/* Row 1 */}
             <div className="bg-white border border-[#c0c0c0] p-2 mb-1 flex flex-wrap items-center gap-4">
               <div className="flex items-center gap-1">
@@ -1046,7 +1630,7 @@ export default function App() {
                 htmlFor="party-input"
                 className="font-bold text-[11px] whitespace-nowrap"
               >
-                Select Party:
+                {t.selectParty}
               </label>
               <input
                 id="party-input"
@@ -1070,15 +1654,136 @@ export default function App() {
               <button
                 type="button"
                 onClick={handleShow}
-                className="bg-[#003366] text-white px-4 py-0.5 text-[11px] font-bold hover:bg-[#004488] active:bg-[#002244] border border-[#001133]"
+                className="bg-[#0066cc] hover:bg-[#0088ee] text-white px-3 py-1 text-[11px] font-bold border border-[#004499]"
                 data-ocid="header.show.button"
               >
-                Show
+                SHOW
               </button>
             </div>
 
+            {/* Search + Add inline */}
+            <div className="bg-[#fffbe6] border border-[#cc8800] p-2 mb-2 flex flex-wrap items-center gap-2">
+              <span className="text-[11px] font-bold text-[#663300]">
+                {t.searchAddLabel}
+              </span>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={searchNum}
+                onChange={(e) => {
+                  if (/^\d{0,3}$/.test(e.target.value))
+                    setSearchNum(e.target.value);
+                }}
+                placeholder="No. (1-100)"
+                className="border border-[#cc8800] bg-white px-2 py-0.5 text-[11px] w-20 text-center focus:outline-none"
+                data-ocid="entry.search.input"
+              />
+              {searchCurrentValue !== null && (
+                <span className="text-[11px] font-bold text-[#cc0000]">
+                  = {searchCurrentValue.toLocaleString("en-IN")}
+                </span>
+              )}
+              <input
+                type="text"
+                inputMode="numeric"
+                value={addAmount}
+                onChange={(e) => {
+                  if (/^\d*$/.test(e.target.value))
+                    setAddAmount(e.target.value);
+                }}
+                placeholder="Add Amount"
+                className="border border-[#006600] bg-white px-2 py-0.5 text-[11px] w-24 text-center focus:outline-none"
+                data-ocid="entry.add_amount.input"
+              />
+              <button
+                type="button"
+                onClick={handleSearchAdd}
+                className="bg-[#cc6600] hover:bg-[#ee8800] text-white px-3 py-0.5 text-[11px] font-bold border border-[#884400]"
+                data-ocid="entry.add.button"
+              >
+                ✚ Add
+              </button>
+            </div>
+
+            {/* Cutting / Multiply options */}
+            <div className="bg-white border border-[#c0c0c0] p-2 mb-1 flex flex-wrap items-center gap-3">
+              <span className="font-bold text-[11px]">Cutting:</span>
+              <label className="flex items-center gap-1 cursor-pointer">
+                <input
+                  type="radio"
+                  name="cuttingType"
+                  checked={cuttingType === "decrease"}
+                  onChange={() => setCuttingType("decrease")}
+                  className="accent-[#003366]"
+                  data-ocid="entry.cutting_decrease.toggle"
+                />
+                <span className="text-[11px]">Decrease</span>
+              </label>
+              <label className="flex items-center gap-1 cursor-pointer">
+                <input
+                  type="radio"
+                  name="cuttingType"
+                  checked={cuttingType === "increase"}
+                  onChange={() => setCuttingType("increase")}
+                  className="accent-[#003366]"
+                  data-ocid="entry.cutting_increase.toggle"
+                />
+                <span className="text-[11px]">Increase</span>
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={cuttingAmount}
+                onChange={(e) => {
+                  if (/^\d*$/.test(e.target.value))
+                    setCuttingAmount(e.target.value);
+                }}
+                placeholder="Amount"
+                className="border border-[#999] px-2 py-0.5 text-[11px] w-20 focus:outline-none"
+                data-ocid="entry.cutting_amount.input"
+              />
+              <span className="text-[11px]">%</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={cuttingPercentage}
+                onChange={(e) => {
+                  if (/^\d*\.?\d*$/.test(e.target.value))
+                    setCuttingPercentage(e.target.value);
+                }}
+                placeholder="%"
+                className="border border-[#999] px-2 py-0.5 text-[11px] w-16 focus:outline-none"
+                data-ocid="entry.cutting_percentage.input"
+              />
+              <span className="text-[11px] ml-2">Multiply N:</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={multiplyN}
+                onChange={(e) => {
+                  if (/^\d*$/.test(e.target.value))
+                    setMultiplyN(e.target.value);
+                }}
+                placeholder="N"
+                className="border border-[#999] px-2 py-0.5 text-[11px] w-16 focus:outline-none"
+                data-ocid="entry.multiply_n.input"
+              />
+              <label className="flex items-center gap-1 cursor-pointer ml-auto">
+                <input
+                  type="checkbox"
+                  checked={highColor}
+                  onChange={(e) => setHighColor(e.target.checked)}
+                  className="accent-[#cc0000]"
+                  data-ocid="entry.high_color.checkbox"
+                />
+                <span className="text-[11px] font-bold text-[#cc0000]">
+                  High Color
+                </span>
+              </label>
+            </div>
+
             {/* Main Grid */}
-            <div className="bg-white border border-[#cc3300] w-full overflow-x-auto">
+            <div className="bg-white border border-[#cc3300] mb-1 w-full overflow-x-auto">
               <table
                 className="border-collapse"
                 style={{ tableLayout: "fixed", width: "100%" }}
@@ -1090,7 +1795,10 @@ export default function App() {
                   <col style={{ width: "15%" }} />
                 </colgroup>
                 <thead>
-                  <tr className="bg-[#003366] text-white">
+                  <tr
+                    className="text-white"
+                    style={{ backgroundColor: gameColor.bg }}
+                  >
                     {COL_HEADERS.map((h) => (
                       <th
                         key={h}
@@ -1099,7 +1807,7 @@ export default function App() {
                         {h}
                       </th>
                     ))}
-                    <th className="border border-[#cc6600] text-center text-[10px] py-0.5 bg-[#004488]">
+                    <th className="border border-[#cc6600] text-center text-[10px] py-0.5 opacity-80">
                       Total
                     </th>
                   </tr>
@@ -1154,7 +1862,7 @@ export default function App() {
               </table>
             </div>
 
-            {/* B Section */}
+            {/* B Section bottom */}
             <div className="bg-white border border-[#cc3300] mt-1 w-full overflow-x-auto">
               <table
                 className="border-collapse"
@@ -1168,7 +1876,10 @@ export default function App() {
                   <col style={{ width: "12%" }} />
                 </colgroup>
                 <thead>
-                  <tr className="bg-[#003366] text-white">
+                  <tr
+                    className="text-white"
+                    style={{ backgroundColor: gameColor.bg }}
+                  >
                     <th className="border border-[#cc6600] text-center text-[10px] py-0.5">
                       B
                     </th>
@@ -1180,7 +1891,7 @@ export default function App() {
                         {lbl}
                       </th>
                     ))}
-                    <th className="border border-[#cc6600] text-center text-[10px] py-0.5 bg-[#004488]">
+                    <th className="border border-[#cc6600] text-center text-[10px] py-0.5 opacity-80">
                       Total
                     </th>
                   </tr>
@@ -1190,7 +1901,7 @@ export default function App() {
                     <td className="border border-[#cc3300] bg-[#f0f4ff]" />
                     {B_LABELS.map((lbl, i) => (
                       <td
-                        key={lbl}
+                        key={`b2-${lbl}`}
                         className="border border-[#cc3300] p-0 relative"
                         style={{ height: "38px" }}
                       >
@@ -1203,7 +1914,7 @@ export default function App() {
                           value={bValues[i]}
                           onChange={(e) => handleBChange(i, e.target.value)}
                           className="w-full h-full pt-3 pb-0.5 text-center text-[12px] font-bold bg-transparent focus:bg-[#fffbe6] focus:outline-none border-none"
-                          data-ocid={`bsection.item.${i + 1}`}
+                          data-ocid={`bsection2.item.${i + 1}`}
                         />
                       </td>
                     ))}
@@ -1215,7 +1926,7 @@ export default function App() {
               </table>
             </div>
 
-            {/* A Section */}
+            {/* A Section bottom */}
             <div className="bg-white border border-[#cc3300] mt-1 w-full overflow-x-auto">
               <table
                 className="border-collapse"
@@ -1229,7 +1940,10 @@ export default function App() {
                   <col style={{ width: "12%" }} />
                 </colgroup>
                 <thead>
-                  <tr className="bg-[#003366] text-white">
+                  <tr
+                    className="text-white"
+                    style={{ backgroundColor: gameColor.bg }}
+                  >
                     <th className="border border-[#cc6600] text-center text-[10px] py-0.5">
                       A
                     </th>
@@ -1241,7 +1955,7 @@ export default function App() {
                         {lbl}
                       </th>
                     ))}
-                    <th className="border border-[#cc6600] text-center text-[10px] py-0.5 bg-[#004488]">
+                    <th className="border border-[#cc6600] text-center text-[10px] py-0.5 opacity-80">
                       Total
                     </th>
                   </tr>
@@ -1251,7 +1965,7 @@ export default function App() {
                     <td className="border border-[#cc3300] bg-[#f0f4ff]" />
                     {A_LABELS.map((lbl, i) => (
                       <td
-                        key={lbl}
+                        key={`a2-${lbl}`}
                         className="border border-[#cc3300] p-0 relative"
                         style={{ height: "38px" }}
                       >
@@ -1264,7 +1978,7 @@ export default function App() {
                           value={aValues[i]}
                           onChange={(e) => handleAChange(i, e.target.value)}
                           className="w-full h-full pt-3 pb-0.5 text-center text-[12px] font-bold bg-transparent focus:bg-[#fffbe6] focus:outline-none border-none"
-                          data-ocid={`asection.item.${i + 1}`}
+                          data-ocid={`asection2.item.${i + 1}`}
                         />
                       </td>
                     ))}
@@ -1276,114 +1990,37 @@ export default function App() {
               </table>
             </div>
 
-            {/* Bottom Controls */}
-            <div className="flex flex-wrap items-start justify-between mt-2 gap-2">
-              <div className="bg-white border border-[#c0c0c0] p-2 flex flex-wrap items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-[11px] text-[#003366]">
-                    Cutting:
-                  </span>
-                  <label className="flex items-center gap-1 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="cuttingType"
-                      checked={cuttingType === "decrease"}
-                      onChange={() => setCuttingType("decrease")}
-                      className="accent-[#003366]"
-                      data-ocid="cutting.decrease.radio"
-                    />
-                    <span className="text-[11px]">Decrease</span>
-                  </label>
-                  <label className="flex items-center gap-1 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="cuttingType"
-                      checked={cuttingType === "increase"}
-                      onChange={() => setCuttingType("increase")}
-                      className="accent-[#003366]"
-                      data-ocid="cutting.increase.radio"
-                    />
-                    <span className="text-[11px]">Increase</span>
-                  </label>
-                  <div className="flex items-center gap-1">
-                    <span className="text-[11px] font-bold">AMOUNT:</span>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      value={cuttingAmount}
-                      onChange={(e) => {
-                        if (/^\d*$/.test(e.target.value))
-                          setCuttingAmount(e.target.value);
-                      }}
-                      className="border border-[#999] w-16 px-1 py-0.5 text-[11px] text-center"
-                      data-ocid="cutting.amount.input"
-                    />
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-[11px] font-bold">%AGE:</span>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      value={cuttingPercentage}
-                      onChange={(e) => {
-                        if (/^\d*$/.test(e.target.value))
-                          setCuttingPercentage(e.target.value);
-                      }}
-                      className="border border-[#999] w-14 px-1 py-0.5 text-[11px] text-center"
-                      data-ocid="cutting.percentage.input"
-                    />
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 border-l border-[#c0c0c0] pl-3">
-                  <span className="font-bold text-[11px] text-[#003366]">
-                    Multiply:
-                  </span>
-                  <span className="text-[11px]">Multiply N:</span>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={multiplyN}
-                    onChange={(e) => {
-                      if (/^\d*$/.test(e.target.value))
-                        setMultiplyN(e.target.value);
-                    }}
-                    className="border border-[#999] w-16 px-1 py-0.5 text-[11px] text-center"
-                    data-ocid="multiply.input"
-                  />
-                </div>
-                <div className="flex items-center gap-2 border-l border-[#c0c0c0] pl-3">
-                  <label className="flex items-center gap-1 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={highColor}
-                      onChange={(e) => setHighColor(e.target.checked)}
-                      className="accent-[#cc3300]"
-                      data-ocid="high_color.checkbox"
-                    />
-                    <span className="font-bold text-[11px] text-[#cc3300]">
-                      High Color
-                    </span>
-                  </label>
-                </div>
-              </div>
-
-              <div className="bg-white border border-[#c0c0c0] p-2 flex items-center gap-3">
-                <span
-                  className="font-bold text-[13px] text-[#cc0000]"
-                  data-ocid="grand_total.section"
-                >
-                  Grand Total : {grandTotal.toLocaleString("en-IN")}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => saveMutation.mutate()}
-                  disabled={saveMutation.isPending}
-                  className="bg-[#006600] text-white px-5 py-1 text-[12px] font-bold hover:bg-[#008800] active:bg-[#004400] border border-[#004400] disabled:opacity-60"
-                  data-ocid="save.submit_button"
-                >
-                  {saveMutation.isPending ? "Saving..." : "SAVE"}
-                </button>
-              </div>
+            {/* Save / Grand Total row */}
+            <div className="bg-white border border-[#c0c0c0] p-2 flex items-center gap-3 mt-1">
+              <span
+                className="font-bold text-[13px] text-[#cc0000]"
+                data-ocid="grand_total.section"
+              >
+                {t.grandTotal} : {grandTotal.toLocaleString("en-IN")}
+              </span>
+              <button
+                type="button"
+                onClick={() => saveMutation.mutate()}
+                disabled={saveMutation.isPending}
+                className="bg-[#006600] text-white px-5 py-1 text-[12px] font-bold hover:bg-[#008800] active:bg-[#004400] border border-[#004400] disabled:opacity-60"
+                data-ocid="save.submit_button"
+              >
+                {saveMutation.isPending ? t.saving : t.save}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (window.confirm(t.confirmClear)) {
+                    setValues(Array(100).fill(""));
+                    setBValues(Array(10).fill(""));
+                    setAValues(Array(10).fill(""));
+                  }
+                }}
+                className="bg-[#cc0000] text-white px-3 py-1 text-[12px] font-bold hover:bg-[#ee0000] active:bg-[#aa0000] border border-[#880000]"
+                data-ocid="clear.amount_button"
+              >
+                {t.clearAll}
+              </button>
             </div>
 
             <footer className="text-center text-[10px] text-[#666] py-2 mt-4 border-t border-[#c0c0c0]">
@@ -1401,20 +2038,82 @@ export default function App() {
         )}
       </div>
 
+      {/* ===== SETTINGS SCREEN ===== */}
+      {screen === "settings" && (
+        <div className="p-4" data-ocid="settings.section">
+          <div className="text-center mb-6">
+            <div className="text-[22px] font-bold text-[#003366] mb-1">
+              {t.settingsTitle}
+            </div>
+          </div>
+
+          {/* Language Setting */}
+          <div className="bg-white border border-[#c0c0c0] rounded-sm p-4 mb-4 shadow-sm">
+            <div className="text-[14px] font-bold text-[#003366] mb-4 pb-2 border-b border-[#e0e0e0]">
+              🌐 {t.language}
+            </div>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => changeLanguage("hi")}
+                className={`flex-1 py-3 px-4 text-[14px] font-bold rounded-sm border-2 transition-all ${
+                  language === "hi"
+                    ? "bg-[#003366] text-white border-[#003366]"
+                    : "bg-white text-[#003366] border-[#c0c0c0] hover:border-[#003366]"
+                }`}
+                data-ocid="settings.hindi.button"
+              >
+                🇮🇳 {t.langHi}
+                {language === "hi" && (
+                  <span className="ml-2 text-[#ffcc44]">✓</span>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => changeLanguage("en")}
+                className={`flex-1 py-3 px-4 text-[14px] font-bold rounded-sm border-2 transition-all ${
+                  language === "en"
+                    ? "bg-[#003366] text-white border-[#003366]"
+                    : "bg-white text-[#003366] border-[#c0c0c0] hover:border-[#003366]"
+                }`}
+                data-ocid="settings.english.button"
+              >
+                🇬🇧 {t.langEn}
+                {language === "en" && (
+                  <span className="ml-2 text-[#ffcc44]">✓</span>
+                )}
+              </button>
+            </div>
+          </div>
+
+          <footer className="text-center text-[10px] text-[#666] py-4 mt-6 border-t border-[#c0c0c0]">
+            © {currentYear}. Built with ❤️ using{" "}
+            <a
+              href={`https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${hostname}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#003366] hover:underline"
+            >
+              caffeine.ai
+            </a>
+          </footer>
+        </div>
+      )}
+
       {/* ===== BOTTOM NAV BAR ===== */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-[#c0c0c0] flex z-40">
         <button
           type="button"
-          onClick={() => setScreen("home")}
+          onClick={() => setScreen("gameselect")}
           className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors ${
-            screen === "home"
+            screen === "gameselect"
               ? "bg-[#003366] text-white"
               : "text-[#555] hover:bg-[#f0f0f0]"
           }`}
           data-ocid="nav.home.tab"
         >
           <span className="text-[18px] leading-none">🏠</span>
-          <span className="text-[10px] font-bold">होम</span>
+          <span className="text-[10px] font-bold">{t.home}</span>
         </button>
         <button
           type="button"
@@ -1427,7 +2126,7 @@ export default function App() {
           data-ocid="nav.search.tab"
         >
           <span className="text-[18px] leading-none">🔍</span>
-          <span className="text-[10px] font-bold">खोजें</span>
+          <span className="text-[10px] font-bold">{t.search}</span>
         </button>
         <button
           type="button"
@@ -1440,7 +2139,20 @@ export default function App() {
           data-ocid="nav.entry.tab"
         >
           <span className="text-[18px] leading-none">📝</span>
-          <span className="text-[10px] font-bold">Entry</span>
+          <span className="text-[10px] font-bold">{t.entry}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setScreen("settings")}
+          className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors ${
+            screen === "settings"
+              ? "bg-[#003366] text-white"
+              : "text-[#555] hover:bg-[#f0f0f0]"
+          }`}
+          data-ocid="nav.settings.tab"
+        >
+          <span className="text-[18px] leading-none">⚙️</span>
+          <span className="text-[10px] font-bold">{t.settings}</span>
         </button>
       </div>
     </div>

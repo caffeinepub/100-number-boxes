@@ -1,6 +1,6 @@
 import { Toaster } from "@/components/ui/sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useActor } from "./hooks/useActor";
 
@@ -16,6 +16,95 @@ const A_LABELS = ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A0"];
 const COL_HEADERS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 const ROWS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 const COLS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+const LS_HISTORY_KEY = "lottery_history_v1";
+const LS_FORM_KEY = "lottery_form_state_v1";
+
+interface LocalHistoryEntry {
+  date: string;
+  game: string;
+  party: string;
+  grandTotal: number;
+  savedAt: number;
+}
+
+interface FormState {
+  date: string;
+  game: string;
+  radioOption: string;
+  party: string;
+  pattiSale: boolean;
+  values: string[];
+  bValues: string[];
+  aValues: string[];
+  cuttingType: "decrease" | "increase";
+  cuttingAmount: string;
+  cuttingPercentage: string;
+  multiplyN: string;
+  highColor: boolean;
+}
+
+function todayStr(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function loadFormState(): FormState {
+  try {
+    const raw = localStorage.getItem(LS_FORM_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<FormState>;
+      return {
+        date: parsed.date ?? todayStr(),
+        game: parsed.game ?? "DS",
+        radioOption: parsed.radioOption ?? "Daily Collection",
+        party: parsed.party ?? "",
+        pattiSale: parsed.pattiSale ?? false,
+        values: parsed.values ?? Array(100).fill(""),
+        bValues: parsed.bValues ?? Array(10).fill(""),
+        aValues: parsed.aValues ?? Array(10).fill(""),
+        cuttingType: parsed.cuttingType ?? "decrease",
+        cuttingAmount: parsed.cuttingAmount ?? "",
+        cuttingPercentage: parsed.cuttingPercentage ?? "",
+        multiplyN: parsed.multiplyN ?? "",
+        highColor: parsed.highColor ?? false,
+      };
+    }
+  } catch {
+    // ignore
+  }
+  return {
+    date: todayStr(),
+    game: "DS",
+    radioOption: "Daily Collection",
+    party: "",
+    pattiSale: false,
+    values: Array(100).fill(""),
+    bValues: Array(10).fill(""),
+    aValues: Array(10).fill(""),
+    cuttingType: "decrease",
+    cuttingAmount: "",
+    cuttingPercentage: "",
+    multiplyN: "",
+    highColor: false,
+  };
+}
+
+function loadLocalHistory(): LocalHistoryEntry[] {
+  try {
+    const raw = localStorage.getItem(LS_HISTORY_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw) as LocalHistoryEntry[];
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalHistory(entries: LocalHistoryEntry[]) {
+  try {
+    localStorage.setItem(LS_HISTORY_KEY, JSON.stringify(entries));
+  } catch {
+    // ignore
+  }
+}
 
 function toNum(v: string): number {
   const n = Number.parseFloat(v);
@@ -24,10 +113,6 @@ function toNum(v: string): number {
 
 function fmt(n: number): string {
   return n === 0 ? "" : String(n);
-}
-
-function todayStr(): string {
-  return new Date().toISOString().slice(0, 10);
 }
 
 function dateToTime(dateStr: string): bigint {
@@ -49,27 +134,85 @@ export default function App() {
   const currentYear = new Date().getFullYear();
   const hostname = encodeURIComponent(window.location.hostname);
 
-  const [date, setDate] = useState(todayStr());
-  const [game, setGame] = useState<string>("DS");
-  const [radioOption, setRadioOption] = useState<string>("Daily Collection");
+  // Load saved form state on startup
+  const initialForm = useMemo(() => loadFormState(), []);
+
+  const [date, setDate] = useState(initialForm.date);
+  const [game, setGame] = useState(initialForm.game);
+  const [radioOption, setRadioOption] = useState(initialForm.radioOption);
   const [userFilter, setUserFilter] = useState<"all" | "selected">("all");
-  const [party, setParty] = useState("");
-  const [pattiSale, setPattiSale] = useState(false);
-  const [values, setValues] = useState<string[]>(Array(100).fill(""));
-  const [bValues, setBValues] = useState<string[]>(Array(10).fill(""));
-  const [aValues, setAValues] = useState<string[]>(Array(10).fill(""));
+  const [party, setParty] = useState(initialForm.party);
+  const [pattiSale, setPattiSale] = useState(initialForm.pattiSale);
+  const [values, setValues] = useState<string[]>(initialForm.values);
+  const [bValues, setBValues] = useState<string[]>(initialForm.bValues);
+  const [aValues, setAValues] = useState<string[]>(initialForm.aValues);
   const [cuttingType, setCuttingType] = useState<"decrease" | "increase">(
-    "decrease",
+    initialForm.cuttingType,
   );
-  const [cuttingAmount, setCuttingAmount] = useState("");
-  const [cuttingPercentage, setCuttingPercentage] = useState("");
-  const [multiplyN, setMultiplyN] = useState("");
-  const [highColor, setHighColor] = useState(false);
+  const [cuttingAmount, setCuttingAmount] = useState(initialForm.cuttingAmount);
+  const [cuttingPercentage, setCuttingPercentage] = useState(
+    initialForm.cuttingPercentage,
+  );
+  const [multiplyN, setMultiplyN] = useState(initialForm.multiplyN);
+  const [highColor, setHighColor] = useState(initialForm.highColor);
   const [showHistory, setShowHistory] = useState(false);
+  const [localHistory, setLocalHistory] = useState<LocalHistoryEntry[]>(() =>
+    loadLocalHistory(),
+  );
 
   // Search + Add state
   const [searchNum, setSearchNum] = useState("");
   const [addAmount, setAddAmount] = useState("");
+
+  // Auto-save form state to localStorage on every change (debounced)
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      try {
+        const state: FormState = {
+          date,
+          game,
+          radioOption,
+          party,
+          pattiSale,
+          values,
+          bValues,
+          aValues,
+          cuttingType,
+          cuttingAmount,
+          cuttingPercentage,
+          multiplyN,
+          highColor,
+        };
+        localStorage.setItem(LS_FORM_KEY, JSON.stringify(state));
+      } catch {
+        // ignore
+      }
+    }, 500);
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    };
+  }, [
+    date,
+    game,
+    radioOption,
+    party,
+    pattiSale,
+    values,
+    bValues,
+    aValues,
+    cuttingType,
+    cuttingAmount,
+    cuttingPercentage,
+    multiplyN,
+    highColor,
+  ]);
+
+  // Sync localHistory to localStorage
+  useEffect(() => {
+    saveLocalHistory(localHistory);
+  }, [localHistory]);
 
   const searchIndex = useMemo(() => {
     const n = Number.parseInt(searchNum, 10);
@@ -166,7 +309,6 @@ export default function App() {
     enabled: false,
   });
 
-  // History query
   const {
     data: historyData,
     isLoading: historyLoading,
@@ -180,17 +322,12 @@ export default function App() {
     enabled: showHistory && !!actor,
   });
 
-  // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async ({
       date: d,
       game: g,
       party: p,
-    }: {
-      date: bigint;
-      game: string;
-      party: string;
-    }) => {
+    }: { date: bigint; game: string; party: string }) => {
       if (!actor) throw new Error("Backend connect nahi hua");
       await actor.deleteData(d, g, p);
     },
@@ -261,9 +398,41 @@ export default function App() {
         BigInt(toNum(multiplyN)),
       );
     },
-    onSuccess: () => toast.success("Data save ho gaya!"),
+    onSuccess: () => {
+      toast.success("Data save ho gaya!");
+      const newEntry: LocalHistoryEntry = {
+        date,
+        game,
+        party,
+        grandTotal,
+        savedAt: Date.now(),
+      };
+      setLocalHistory((prev) => {
+        const filtered = prev.filter(
+          (e) => !(e.date === date && e.game === game && e.party === party),
+        );
+        return [newEntry, ...filtered];
+      });
+      setShowHistory(true);
+      queryClient.invalidateQueries({ queryKey: ["history"] });
+      refetchHistory();
+    },
     onError: (e) => toast.error(`Save nahi hua: ${e}`),
   });
+
+  const deleteLocalEntry = useCallback((entry: LocalHistoryEntry) => {
+    setLocalHistory((prev) =>
+      prev.filter(
+        (e) =>
+          !(
+            e.date === entry.date &&
+            e.game === entry.game &&
+            e.party === entry.party
+          ),
+      ),
+    );
+    toast.success("Record delete ho gaya!");
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#f0f0f0] font-mono text-xs w-full">
@@ -307,19 +476,20 @@ export default function App() {
             <div className="p-3">
               {historyLoading ? (
                 <div
-                  className="text-center py-8 text-[#003366] font-bold text-sm"
+                  className="text-center py-4 text-[#003366] font-bold text-sm"
                   data-ocid="history.loading_state"
                 >
                   लोड हो रहा है...
+                  {localHistory.length > 0 && (
+                    <div className="mt-3">
+                      <LocalHistoryTable
+                        entries={localHistory}
+                        onDelete={deleteLocalEntry}
+                      />
+                    </div>
+                  )}
                 </div>
-              ) : !historyData || historyData.length === 0 ? (
-                <div
-                  className="text-center py-8 text-[#666] text-sm"
-                  data-ocid="history.empty_state"
-                >
-                  कोई इतिहास नहीं
-                </div>
-              ) : (
+              ) : historyData && historyData.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse text-[11px]">
                     <thead>
@@ -389,6 +559,18 @@ export default function App() {
                       })}
                     </tbody>
                   </table>
+                </div>
+              ) : localHistory.length > 0 ? (
+                <LocalHistoryTable
+                  entries={localHistory}
+                  onDelete={deleteLocalEntry}
+                />
+              ) : (
+                <div
+                  className="text-center py-8 text-[#666] text-sm"
+                  data-ocid="history.empty_state"
+                >
+                  कोई इतिहास नहीं
                 </div>
               )}
             </div>
@@ -931,6 +1113,70 @@ export default function App() {
           caffeine.ai
         </a>
       </footer>
+    </div>
+  );
+}
+
+function LocalHistoryTable({
+  entries,
+  onDelete,
+}: {
+  entries: LocalHistoryEntry[];
+  onDelete: (entry: LocalHistoryEntry) => void;
+}) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full border-collapse text-[11px]">
+        <thead>
+          <tr className="bg-[#003366] text-white">
+            <th className="border border-[#004488] px-2 py-1 text-left">
+              तारीख
+            </th>
+            <th className="border border-[#004488] px-2 py-1 text-left">गेम</th>
+            <th className="border border-[#004488] px-2 py-1 text-left">
+              पार्टी
+            </th>
+            <th className="border border-[#004488] px-2 py-1 text-right">कुल</th>
+            <th className="border border-[#004488] px-2 py-1 text-center">
+              हटाएं
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {entries.map((entry, idx) => (
+            <tr
+              key={`${entry.date}-${entry.game}-${entry.party}-${entry.savedAt}`}
+              className={idx % 2 === 0 ? "bg-white" : "bg-[#f5f8ff]"}
+            >
+              <td className="border border-[#c0c0c0] px-2 py-1">
+                {new Date(entry.date).toLocaleDateString("en-IN", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                })}
+              </td>
+              <td className="border border-[#c0c0c0] px-2 py-1 font-bold text-[#003366]">
+                {entry.game}
+              </td>
+              <td className="border border-[#c0c0c0] px-2 py-1">
+                {entry.party || "-"}
+              </td>
+              <td className="border border-[#c0c0c0] px-2 py-1 text-right font-bold text-[#cc0000]">
+                {entry.grandTotal.toLocaleString("en-IN")}
+              </td>
+              <td className="border border-[#c0c0c0] px-2 py-1 text-center">
+                <button
+                  type="button"
+                  onClick={() => onDelete(entry)}
+                  className="bg-[#cc0000] hover:bg-[#ee0000] text-white px-2 py-0.5 text-[10px] font-bold border border-[#880000]"
+                >
+                  🗑 हटाएं
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

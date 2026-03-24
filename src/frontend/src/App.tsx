@@ -156,6 +156,7 @@ export default function App() {
   const [multiplyN, setMultiplyN] = useState(initialForm.multiplyN);
   const [highColor, setHighColor] = useState(initialForm.highColor);
   const [showHistory, setShowHistory] = useState(false);
+  const [historyGameTab, setHistoryGameTab] = useState<string>("DS");
   const [localHistory, setLocalHistory] = useState<LocalHistoryEntry[]>(() =>
     loadLocalHistory(),
   );
@@ -413,6 +414,7 @@ export default function App() {
         );
         return [newEntry, ...filtered];
       });
+      setHistoryGameTab(game);
       setShowHistory(true);
       queryClient.invalidateQueries({ queryKey: ["history"] });
       refetchHistory();
@@ -433,6 +435,22 @@ export default function App() {
     );
     toast.success("Record delete ho gaya!");
   }, []);
+
+  // Filtered local history for current tab, grouped by date
+  const filteredLocalHistory = useMemo(
+    () => localHistory.filter((e) => e.game === historyGameTab),
+    [localHistory, historyGameTab],
+  );
+
+  const groupedLocalHistory = useMemo(() => {
+    const groups: Record<string, LocalHistoryEntry[]> = {};
+    for (const entry of filteredLocalHistory) {
+      if (!groups[entry.date]) groups[entry.date] = [];
+      groups[entry.date].push(entry);
+    }
+    // Sort dates descending
+    return Object.entries(groups).sort(([a], [b]) => (a > b ? -1 : 1));
+  }, [filteredLocalHistory]);
 
   return (
     <div className="min-h-screen bg-[#f0f0f0] font-mono text-xs w-full">
@@ -462,6 +480,7 @@ export default function App() {
           data-ocid="history.modal"
         >
           <div className="bg-white w-full max-w-2xl my-4 mx-2 shadow-2xl rounded-sm">
+            {/* Modal Header */}
             <div className="bg-[#003366] text-white px-4 py-2 flex items-center justify-between">
               <span className="font-bold text-sm">📋 इतिहास (History)</span>
               <button
@@ -473,104 +492,204 @@ export default function App() {
                 ✕ बंद करें
               </button>
             </div>
+
+            {/* Game Tabs */}
+            <div className="flex border-b-2 border-[#003366] bg-[#e8eef8]">
+              {GAMES.map((g) => (
+                <button
+                  key={g}
+                  type="button"
+                  onClick={() => setHistoryGameTab(g)}
+                  className={`flex-1 py-2 text-[12px] font-bold border-r border-[#c0c0c0] last:border-r-0 transition-colors ${
+                    historyGameTab === g
+                      ? "bg-[#003366] text-white border-b-2 border-b-[#ffcc44]"
+                      : "bg-[#e8eef8] text-[#003366] hover:bg-[#d0dcf0]"
+                  }`}
+                  data-ocid={"history.tab"}
+                >
+                  {g}
+                </button>
+              ))}
+            </div>
+
+            {/* Modal Content */}
             <div className="p-3">
-              {historyLoading ? (
+              {historyLoading && (
                 <div
-                  className="text-center py-4 text-[#003366] font-bold text-sm"
+                  className="text-center py-2 text-[#003366] font-bold text-[11px] mb-2"
                   data-ocid="history.loading_state"
                 >
-                  लोड हो रहा है...
-                  {localHistory.length > 0 && (
-                    <div className="mt-3">
-                      <LocalHistoryTable
-                        entries={localHistory}
-                        onDelete={deleteLocalEntry}
-                      />
-                    </div>
-                  )}
+                  बैकएंड से लोड हो रहा है...
                 </div>
-              ) : historyData && historyData.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse text-[11px]">
-                    <thead>
-                      <tr className="bg-[#003366] text-white">
-                        <th className="border border-[#004488] px-2 py-1 text-left">
-                          तारीख
-                        </th>
-                        <th className="border border-[#004488] px-2 py-1 text-left">
-                          गेम
-                        </th>
-                        <th className="border border-[#004488] px-2 py-1 text-left">
-                          पार्टी
-                        </th>
-                        <th className="border border-[#004488] px-2 py-1 text-right">
-                          कुल
-                        </th>
-                        <th className="border border-[#004488] px-2 py-1 text-center">
-                          हटाएं
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {historyData.map((entry, idx) => {
-                        const total = entry.numbers.reduce(
-                          (s, v) => s + Number(v),
-                          0,
-                        );
-                        return (
-                          <tr
-                            key={`${entry.date}-${entry.game}-${entry.party}`}
-                            className={
-                              idx % 2 === 0 ? "bg-white" : "bg-[#f5f8ff]"
-                            }
-                            data-ocid={`history.item.${idx + 1}`}
-                          >
-                            <td className="border border-[#c0c0c0] px-2 py-1">
-                              {nsToDateStr(entry.date)}
-                            </td>
-                            <td className="border border-[#c0c0c0] px-2 py-1 font-bold text-[#003366]">
-                              {entry.game}
-                            </td>
-                            <td className="border border-[#c0c0c0] px-2 py-1">
-                              {entry.party || "-"}
-                            </td>
-                            <td className="border border-[#c0c0c0] px-2 py-1 text-right font-bold text-[#cc0000]">
-                              {total.toLocaleString("en-IN")}
-                            </td>
-                            <td className="border border-[#c0c0c0] px-2 py-1 text-center">
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  deleteMutation.mutate({
-                                    date: entry.date,
-                                    game: entry.game,
-                                    party: entry.party,
-                                  })
-                                }
-                                disabled={deleteMutation.isPending}
-                                className="bg-[#cc0000] hover:bg-[#ee0000] text-white px-2 py-0.5 text-[10px] font-bold border border-[#880000] disabled:opacity-50"
-                                data-ocid={`history.delete_button.${idx + 1}`}
-                              >
-                                🗑 हटाएं
-                              </button>
-                            </td>
+              )}
+
+              {/* Local history grouped by date for selected tab */}
+              {groupedLocalHistory.length > 0 ? (
+                <div>
+                  {groupedLocalHistory.map(([groupDate, entries]) => (
+                    <div key={groupDate} className="mb-3">
+                      {/* Date Group Header */}
+                      <div className="bg-[#003366] text-white px-3 py-1 text-[11px] font-bold flex items-center gap-2 mb-1">
+                        <span>📅</span>
+                        <span>
+                          {new Date(groupDate).toLocaleDateString("en-IN", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                          })}
+                        </span>
+                        <span className="ml-auto text-[#ffcc44]">
+                          {entries.length} entries
+                        </span>
+                      </div>
+                      {/* Entries under this date */}
+                      <table className="w-full border-collapse text-[11px]">
+                        <thead>
+                          <tr className="bg-[#dce8ff]">
+                            <th className="border border-[#b0c4de] px-2 py-1 text-left text-[#003366]">
+                              समय
+                            </th>
+                            <th className="border border-[#b0c4de] px-2 py-1 text-left text-[#003366]">
+                              पार्टी
+                            </th>
+                            <th className="border border-[#b0c4de] px-2 py-1 text-right text-[#003366]">
+                              कुल
+                            </th>
+                            <th className="border border-[#b0c4de] px-2 py-1 text-center text-[#003366]">
+                              हटाएं
+                            </th>
                           </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                        </thead>
+                        <tbody>
+                          {entries.map((entry, idx) => (
+                            <tr
+                              key={`${entry.date}-${entry.game}-${entry.party}-${entry.savedAt}`}
+                              className={
+                                idx % 2 === 0 ? "bg-white" : "bg-[#f5f8ff]"
+                              }
+                              data-ocid={`history.item.${idx + 1}`}
+                            >
+                              <td className="border border-[#c0c0c0] px-2 py-1 text-[#555]">
+                                {new Date(entry.savedAt).toLocaleTimeString(
+                                  "en-IN",
+                                  {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    second: "2-digit",
+                                  },
+                                )}
+                              </td>
+                              <td className="border border-[#c0c0c0] px-2 py-1">
+                                {entry.party || "-"}
+                              </td>
+                              <td className="border border-[#c0c0c0] px-2 py-1 text-right font-bold text-[#cc0000]">
+                                {entry.grandTotal.toLocaleString("en-IN")}
+                              </td>
+                              <td className="border border-[#c0c0c0] px-2 py-1 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => deleteLocalEntry(entry)}
+                                  className="bg-[#cc0000] hover:bg-[#ee0000] text-white px-2 py-0.5 text-[10px] font-bold border border-[#880000]"
+                                  data-ocid={`history.delete_button.${idx + 1}`}
+                                >
+                                  🗑 हटाएं
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ))}
                 </div>
-              ) : localHistory.length > 0 ? (
-                <LocalHistoryTable
-                  entries={localHistory}
-                  onDelete={deleteLocalEntry}
-                />
               ) : (
                 <div
-                  className="text-center py-8 text-[#666] text-sm"
+                  className="text-center py-6 text-[#666] text-sm"
                   data-ocid="history.empty_state"
                 >
-                  कोई इतिहास नहीं
+                  <div className="text-2xl mb-2">📭</div>
+                  <div className="font-bold text-[#003366]">
+                    {historyGameTab} गेम की
+                  </div>
+                  <div>कोई इतिहास नहीं</div>
+                </div>
+              )}
+
+              {/* Backend history fallback */}
+              {historyData && historyData.length > 0 && (
+                <div className="mt-4 border-t-2 border-dashed border-[#c0c0c0] pt-3">
+                  <div className="text-[11px] font-bold text-[#003366] mb-2">
+                    📦 बैकएंड से सेव डेटा:
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse text-[11px]">
+                      <thead>
+                        <tr className="bg-[#003366] text-white">
+                          <th className="border border-[#004488] px-2 py-1 text-left">
+                            तारीख
+                          </th>
+                          <th className="border border-[#004488] px-2 py-1 text-left">
+                            गेम
+                          </th>
+                          <th className="border border-[#004488] px-2 py-1 text-left">
+                            पार्टी
+                          </th>
+                          <th className="border border-[#004488] px-2 py-1 text-right">
+                            कुल
+                          </th>
+                          <th className="border border-[#004488] px-2 py-1 text-center">
+                            हटाएं
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {historyData.map((entry, idx) => {
+                          const total = entry.numbers.reduce(
+                            (s, v) => s + Number(v),
+                            0,
+                          );
+                          return (
+                            <tr
+                              key={`${entry.date}-${entry.game}-${entry.party}`}
+                              className={
+                                idx % 2 === 0 ? "bg-white" : "bg-[#f5f8ff]"
+                              }
+                            >
+                              <td className="border border-[#c0c0c0] px-2 py-1">
+                                {nsToDateStr(entry.date)}
+                              </td>
+                              <td className="border border-[#c0c0c0] px-2 py-1 font-bold text-[#003366]">
+                                {entry.game}
+                              </td>
+                              <td className="border border-[#c0c0c0] px-2 py-1">
+                                {entry.party || "-"}
+                              </td>
+                              <td className="border border-[#c0c0c0] px-2 py-1 text-right font-bold text-[#cc0000]">
+                                {total.toLocaleString("en-IN")}
+                              </td>
+                              <td className="border border-[#c0c0c0] px-2 py-1 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    deleteMutation.mutate({
+                                      date: entry.date,
+                                      game: entry.game,
+                                      party: entry.party,
+                                    })
+                                  }
+                                  disabled={deleteMutation.isPending}
+                                  className="bg-[#cc0000] hover:bg-[#ee0000] text-white px-2 py-0.5 text-[10px] font-bold border border-[#880000] disabled:opacity-50"
+                                  data-ocid={`history.delete_button.${idx + 1}`}
+                                >
+                                  🗑 हटाएं
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
             </div>
@@ -1113,70 +1232,6 @@ export default function App() {
           caffeine.ai
         </a>
       </footer>
-    </div>
-  );
-}
-
-function LocalHistoryTable({
-  entries,
-  onDelete,
-}: {
-  entries: LocalHistoryEntry[];
-  onDelete: (entry: LocalHistoryEntry) => void;
-}) {
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse text-[11px]">
-        <thead>
-          <tr className="bg-[#003366] text-white">
-            <th className="border border-[#004488] px-2 py-1 text-left">
-              तारीख
-            </th>
-            <th className="border border-[#004488] px-2 py-1 text-left">गेम</th>
-            <th className="border border-[#004488] px-2 py-1 text-left">
-              पार्टी
-            </th>
-            <th className="border border-[#004488] px-2 py-1 text-right">कुल</th>
-            <th className="border border-[#004488] px-2 py-1 text-center">
-              हटाएं
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {entries.map((entry, idx) => (
-            <tr
-              key={`${entry.date}-${entry.game}-${entry.party}-${entry.savedAt}`}
-              className={idx % 2 === 0 ? "bg-white" : "bg-[#f5f8ff]"}
-            >
-              <td className="border border-[#c0c0c0] px-2 py-1">
-                {new Date(entry.date).toLocaleDateString("en-IN", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                })}
-              </td>
-              <td className="border border-[#c0c0c0] px-2 py-1 font-bold text-[#003366]">
-                {entry.game}
-              </td>
-              <td className="border border-[#c0c0c0] px-2 py-1">
-                {entry.party || "-"}
-              </td>
-              <td className="border border-[#c0c0c0] px-2 py-1 text-right font-bold text-[#cc0000]">
-                {entry.grandTotal.toLocaleString("en-IN")}
-              </td>
-              <td className="border border-[#c0c0c0] px-2 py-1 text-center">
-                <button
-                  type="button"
-                  onClick={() => onDelete(entry)}
-                  className="bg-[#cc0000] hover:bg-[#ee0000] text-white px-2 py-0.5 text-[10px] font-bold border border-[#880000]"
-                >
-                  🗑 हटाएं
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </div>
   );
 }

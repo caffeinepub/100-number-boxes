@@ -1,39 +1,25 @@
-# Lottery Collection Entry App
+# 100 Number Boxes
 
 ## Current State
-App has 100 numbered input boxes with grand total. Simple layout.
+App has a single screen with a 10x10 grid, Search+Add section embedded above the grid, history modal, and save/show functionality. All in one App.tsx.
 
 ## Requested Changes (Diff)
 
 ### Add
-- Header controls: Date picker, Game dropdown (DS, etc.), radio buttons (Actual Yantri, Daily Collection, Agent, Patti)
-- Select Party dropdown with text input
-- PATTI SALE checkbox
-- Show button
-- USER FILTER section (All Users / Selected Users radio)
-- Row totals column (right side of grid, per row of 10)
-- Column totals row (bottom of grid, per column)
-- Grand Total displayed prominently in red
-- B section: 10 boxes labeled B1-B9, B0 with individual inputs and row total
-- A section: 10 boxes labeled A1-A9, A0 with individual inputs and row total
-- Cutting section: Decrease/Increase radio, Amount field, %Age field
-- Multiply section: Multiply N input field
-- High Color option
+- A Home Screen with two navigation buttons: "Number Khojo & Jodo" and "Entry"
+- A dedicated Search+Add Screen accessible from the home screen
+- Bottom navigation bar on all screens to switch between Home, Search+Add, and Entry
 
 ### Modify
-- Main 10x10 grid: each cell shows box number (small top-left) and input value
-- Column totals shown below grid
-- Overall layout to match the screenshot style
+- App.tsx to support screen-based navigation (home | search | entry)
+- Remove the embedded Search+Add section from the Entry screen (it will live in its own screen)
 
 ### Remove
-- Old simple layout
+- Nothing removed permanently; Search+Add section moves to its own screen
 
 ## Implementation Plan
-1. Redesign frontend to match screenshot exactly
-2. Header row with Date, Game, radio buttons, USER FILTER
-3. Select Party row with PATTI SALE and Show button
-4. Main 10x10 grid (1-100) with row sums and column sums
-5. B section and A section below the grid
-6. Grand Total display
-7. Cutting and Multiply controls at the bottom
-8. All calculations done in real-time on frontend
+1. Add a `screen` state: 'home' | 'search' | 'entry'
+2. Create HomeScreen component with two big buttons
+3. Create SearchScreen component with dedicated full-page Search+Add UI (shows number, current value, add input, result)
+4. Move existing App content into EntryScreen
+5. Add a sticky bottom nav bar to navigate between screens

@@ -358,6 +358,67 @@ function dateToTime(dateStr: string): bigint {
   return BigInt(new Date(dateStr).getTime() * 1_000_000);
 }
 
+// Helper: parse range-amount format block
+// numLine: "48=84=03=30=07=07", amtLine: "15=============15" or "20=======20=25=25"
+function parseRangeAmountBlock(
+  numLine: string,
+  amtLine: string,
+): Array<{ num: number; amount: number }> {
+  const numTokens = numLine
+    .split(/=+/)
+    .map((s) => s.trim())
+    .filter((s) => /^\d+$/.test(s));
+  const nums = numTokens
+    .map((s) => Number.parseInt(s, 10))
+    .filter((n) => n >= 1 && n <= 100);
+  if (nums.length === 0) return [];
+
+  // Split amtLine preserving separator lengths
+  const amtParts = amtLine.split(/(=+)/);
+  const tokens: string[] = [];
+  const seps: number[] = [];
+  for (const part of amtParts) {
+    if (/^=+$/.test(part)) seps.push(part.length);
+    else if (/^\d+$/.test(part.trim())) tokens.push(part.trim());
+  }
+
+  // Build segments: span if sep >= 3 and same value on both sides
+  const segments: Array<{ value: number; isSpan: boolean }> = [];
+  let i = 0;
+  while (i < tokens.length) {
+    if (
+      i + 1 < tokens.length &&
+      i < seps.length &&
+      seps[i] >= 3 &&
+      tokens[i] === tokens[i + 1]
+    ) {
+      segments.push({ value: Number.parseInt(tokens[i], 10), isSpan: true });
+      i += 2;
+    } else {
+      segments.push({ value: Number.parseInt(tokens[i], 10), isSpan: false });
+      i++;
+    }
+  }
+
+  const individualCount = segments.filter((s) => !s.isSpan).length;
+  const spanCovers = Math.max(0, nums.length - individualCount);
+
+  const amounts: number[] = [];
+  for (const seg of segments) {
+    if (seg.isSpan) {
+      for (let k = 0; k < spanCovers; k++) amounts.push(seg.value);
+    } else {
+      amounts.push(seg.value);
+    }
+  }
+
+  const results: Array<{ num: number; amount: number }> = [];
+  for (let j = 0; j < Math.min(nums.length, amounts.length); j++) {
+    if (amounts[j] > 0) results.push({ num: nums[j], amount: amounts[j] });
+  }
+  return results;
+}
+
 function parseChatInput(text: string): Array<{ num: number; amount: number }> {
   const results: Array<{ num: number; amount: number }> = [];
   const seen = new Set<number>();
@@ -366,7 +427,39 @@ function parseChatInput(text: string): Array<{ num: number; amount: number }> {
   const inputLines = fullText
     .split(/\n/)
     .map((l) => l.trim())
+    // Strip label prefixes like "Number", "Amount", "No.", "No " etc.
+    .map((l) => l.replace(/^(number|amount|no\.?|नंबर|अमाउंट)\s*/i, "").trim())
     .filter((l) => l.length > 0);
+
+  // Format RANGE: Two-line range-amount format
+  // Line 1: numbers separated by = e.g. "48=84=03=30=07=07"
+  // Line 2: amounts with span indicator e.g. "15=============15" or "20=======20=25=25"
+  // Span = same value with 3+ = signs between them; span covers remaining numbers
+  {
+    const rangeResults: Array<{ num: number; amount: number }> = [];
+    let ri = 0;
+    let foundRange = false;
+    while (ri < inputLines.length) {
+      const numLine = inputLines[ri];
+      const amtLine = ri + 1 < inputLines.length ? inputLines[ri + 1] : "";
+      const numTokens = numLine
+        .split(/=+/)
+        .map((s) => s.trim())
+        .filter((s) => /^\d+$/.test(s));
+      const validNums = numTokens
+        .map((s) => Number.parseInt(s, 10))
+        .filter((n) => n >= 1 && n <= 100);
+      const hasSpan = /={3,}/.test(amtLine) && /\d/.test(amtLine);
+      if (validNums.length >= 2 && hasSpan) {
+        foundRange = true;
+        rangeResults.push(...parseRangeAmountBlock(numLine, amtLine));
+        ri += 2;
+      } else {
+        ri++;
+      }
+    }
+    if (foundRange && rangeResults.length > 0) return rangeResults;
+  }
 
   // Format 0: Two-line comma/dot separated format
   // Line 1: numbers (commas/dots as separators, empty = skip)
@@ -387,11 +480,8 @@ function parseChatInput(text: string): Array<{ num: number; amount: number }> {
         (s) => /^\d+$/.test(s) && Number(s) >= 1 && Number(s) <= 100,
       );
       const validAmts = amtsRaw.filter((s) => /^\d+$/.test(s) && Number(s) > 0);
-      // Detect: line1 is all valid nums (1-100), line2 is amounts, and both have values
-      const line1AllNums = numsRaw.every(
-        (s) =>
-          s === "" || (/^\d+$/.test(s) && Number(s) >= 1 && Number(s) <= 100),
-      );
+      // Detect: line1 is all nums (any digit sequences, including >100), line2 is amounts
+      const line1AllNums = numsRaw.every((s) => s === "" || /^\d+$/.test(s));
       const line2AllAmts = amtsRaw.every((s) => s === "" || /^\d+$/.test(s));
       if (
         validNums.length > 0 &&
@@ -399,10 +489,13 @@ function parseChatInput(text: string): Array<{ num: number; amount: number }> {
         line1AllNums &&
         line2AllAmts
       ) {
-        for (let j = 0; j < validNums.length; j++) {
-          const num = Number.parseInt(validNums[j], 10);
+        // Pair all non-empty tokens positionally (preserving positions for >100 numbers)
+        const allNums = numsRaw.filter((s) => /^\d+$/.test(s));
+        const allAmts = amtsRaw.filter((s) => /^\d+$/.test(s));
+        for (let j = 0; j < allNums.length; j++) {
+          const num = Number.parseInt(allNums[j], 10);
           const amount = Number.parseInt(
-            validAmts[Math.min(j, validAmts.length - 1)],
+            allAmts[Math.min(j, allAmts.length - 1)],
             10,
           );
           if (num >= 1 && num <= 100 && amount > 0 && !pairSeen.has(num)) {

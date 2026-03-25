@@ -363,12 +363,63 @@ function parseChatInput(text: string): Array<{ num: number; amount: number }> {
   const seen = new Set<number>();
   const fullText = text.trim();
 
-  // Format 1: numbers line * amounts line
-  // e.g. "71*61*57*\n20*20*20*"
   const inputLines = fullText
     .split(/\n/)
     .map((l) => l.trim())
     .filter((l) => l.length > 0);
+
+  // Format 0: Two-line comma/dot separated format
+  // Line 1: numbers (commas/dots as separators, empty = skip)
+  // Line 2: amounts (commas/dots as separators, empty = skip)
+  // Pair non-empty values in order
+  // e.g. "21,,,,48,,,,49,,,40\n100,,20,,,20,,,20,,,,50,,,,20"
+  // also handles "63..53..43..95.\n20..20..20..20"
+  if (inputLines.length >= 2) {
+    // Try multi-line groups: pairs of lines where line1 is nums and line2 is amounts
+    let i = 0;
+    const pairResults: Array<{ num: number; amount: number }> = [];
+    const pairSeen = new Set<number>();
+    while (i < inputLines.length - 1) {
+      const sep = /[,\.]+/;
+      const numsRaw = inputLines[i].split(sep).map((s) => s.trim());
+      const amtsRaw = inputLines[i + 1].split(sep).map((s) => s.trim());
+      const validNums = numsRaw.filter(
+        (s) => /^\d+$/.test(s) && Number(s) >= 1 && Number(s) <= 100,
+      );
+      const validAmts = amtsRaw.filter((s) => /^\d+$/.test(s) && Number(s) > 0);
+      // Detect: line1 is all valid nums (1-100), line2 is amounts, and both have values
+      const line1AllNums = numsRaw.every(
+        (s) =>
+          s === "" || (/^\d+$/.test(s) && Number(s) >= 1 && Number(s) <= 100),
+      );
+      const line2AllAmts = amtsRaw.every((s) => s === "" || /^\d+$/.test(s));
+      if (
+        validNums.length > 0 &&
+        validAmts.length > 0 &&
+        line1AllNums &&
+        line2AllAmts
+      ) {
+        for (let j = 0; j < validNums.length; j++) {
+          const num = Number.parseInt(validNums[j], 10);
+          const amount = Number.parseInt(
+            validAmts[Math.min(j, validAmts.length - 1)],
+            10,
+          );
+          if (num >= 1 && num <= 100 && amount > 0 && !pairSeen.has(num)) {
+            pairSeen.add(num);
+            pairResults.push({ num, amount });
+          }
+        }
+        i += 2;
+        continue;
+      }
+      break;
+    }
+    if (pairResults.length > 0) return pairResults;
+  }
+
+  // Format 1: numbers line * amounts line
+  // e.g. "71*61*57*\n20*20*20*"
   // Check if consecutive pairs of lines are num-line / amount-line separated by *
   let i = 0;
   while (i < inputLines.length - 1) {

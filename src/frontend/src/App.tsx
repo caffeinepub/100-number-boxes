@@ -226,7 +226,7 @@ interface FormState {
   highColor: boolean;
 }
 
-type Screen = "gameselect" | "home" | "search" | "entry" | "settings";
+type Screen = "gameselect" | "home" | "search" | "entry" | "settings" | "chat";
 
 function todayStr(): string {
   return new Date().toISOString().slice(0, 10);
@@ -358,6 +358,32 @@ function dateToTime(dateStr: string): bigint {
   return BigInt(new Date(dateStr).getTime() * 1_000_000);
 }
 
+function parseChatInput(text: string): Array<{ num: number; amount: number }> {
+  const results: Array<{ num: number; amount: number }> = [];
+  const seen = new Set<number>();
+  const cleaned = text
+    .replace(/नंबर|number|no\.|no |पर|में|pe|mein|add|jodo|जोड़ो/gi, " ")
+    .replace(/[,;|]/g, " ");
+  const patternSources = [
+    "(\\d{1,3})\\s*[-:=]\\s*(\\d+)",
+    "(\\d{1,3})\\s+(\\d{2,})",
+  ];
+  for (const src of patternSources) {
+    const regex = new RegExp(src, "g");
+    let match = regex.exec(cleaned);
+    while (match !== null) {
+      const num = Number.parseInt(match[1], 10);
+      const amount = Number.parseInt(match[2], 10);
+      if (num >= 1 && num <= 100 && amount > 0 && !seen.has(num)) {
+        seen.add(num);
+        results.push({ num, amount });
+      }
+      match = regex.exec(cleaned);
+    }
+  }
+  return results;
+}
+
 function calcGrandTotal(gd: GameData): number {
   return gd.values.reduce((s, v) => s + toNum(v), 0);
 }
@@ -412,6 +438,12 @@ export default function App() {
   // Search + Add state
   const [searchNum, setSearchNum] = useState("");
   const [addAmount, setAddAmount] = useState("");
+
+  // Chat state
+  const [chatInput, setChatInput] = useState("");
+  const [chatParsed, setChatParsed] = useState<
+    Array<{ num: number; amount: number }>
+  >([]);
 
   // Track previous game to save/load on change
   const prevGameRef = useRef(game);
@@ -1323,6 +1355,23 @@ export default function App() {
                   Grand Total: {grandTotal.toLocaleString("en-IN")}
                 </div>
               </button>
+
+              <button
+                type="button"
+                onClick={() => setScreen("chat")}
+                className="w-full bg-gradient-to-br from-[#003366] to-[#0055aa] text-white rounded-sm shadow-lg border-2 border-[#001133] p-6 text-left active:opacity-90 hover:from-[#004488] hover:to-[#0066cc] transition-all"
+                data-ocid="home.chat.button"
+              >
+                <div className="text-3xl mb-2">💬</div>
+                <div className="font-bold text-lg leading-tight">
+                  {language === "hi" ? "स्मार्ट चैट एंट्री" : "Smart Chat Entry"}
+                </div>
+                <div className="text-[12px] opacity-80 mt-1">
+                  {language === "hi"
+                    ? "टेक्स्ट से नंबर और amount auto-detect होगा"
+                    : "Auto-detect numbers and amounts from text"}
+                </div>
+              </button>
             </div>
 
             {/* Recent History Quick View */}
@@ -2100,6 +2149,150 @@ export default function App() {
         </div>
       )}
 
+      {/* ===== CHAT SCREEN ===== */}
+      {screen === "chat" && (
+        <div className="p-3" data-ocid="chat.section">
+          <div className="flex items-center gap-2 mb-3">
+            <button
+              type="button"
+              onClick={() => setScreen("home")}
+              className="flex items-center gap-1 bg-[#003366] text-white text-[12px] font-bold px-3 py-1.5 rounded-sm hover:bg-[#004488] transition-colors"
+              data-ocid="chat.home_button"
+            >
+              🏠 {language === "hi" ? "होम" : "Home"}
+            </button>
+            <span
+              className="text-[13px] font-bold px-3 py-1 rounded-sm"
+              style={{ backgroundColor: gameColor.bg, color: gameColor.text }}
+            >
+              🎮 {game}
+            </span>
+          </div>
+
+          <div className="bg-[#e8f0ff] border-2 border-[#003366] rounded-sm p-4 mb-3">
+            <div className="text-[14px] font-bold text-[#003366] mb-2">
+              💬 {language === "hi" ? "स्मार्ट चैट एंट्री" : "Smart Chat Entry"}
+            </div>
+            <div className="text-[11px] text-[#555] mb-3">
+              {language === "hi"
+                ? "नीचे नंबर और amount टाइप करें। जैसे: 5-500 10-200 या 5 500, 10 200"
+                : "Type number and amount below. E.g.: 5-500 10-200 or 5 500, 10 200"}
+            </div>
+            <textarea
+              value={chatInput}
+              onChange={(e) => {
+                setChatInput(e.target.value);
+                setChatParsed(parseChatInput(e.target.value));
+              }}
+              placeholder={
+                language === "hi"
+                  ? "यहाँ टाइप करें...\nजैसे: 5-500 10-200 25-1500"
+                  : "Type here...\nE.g.: 5-500 10-200 25-1500"
+              }
+              className="w-full border-2 border-[#003366] bg-white px-3 py-2 text-[13px] font-mono focus:outline-none focus:border-[#0055aa] min-h-[120px] resize-y"
+              data-ocid="chat.input"
+            />
+          </div>
+
+          {chatParsed.length > 0 && (
+            <div
+              className="bg-white border-2 border-[#00aa00] rounded-sm p-3 mb-3"
+              data-ocid="chat.preview"
+            >
+              <div className="text-[12px] font-bold text-[#006600] mb-2">
+                ✅{" "}
+                {language === "hi"
+                  ? `${chatParsed.length} एंट्री मिलीं:`
+                  : `${chatParsed.length} entries found:`}
+              </div>
+              <div className="max-h-[180px] overflow-y-auto">
+                <table className="w-full border-collapse text-[11px]">
+                  <thead>
+                    <tr className="bg-[#e8ffe8]">
+                      <th className="border border-[#88cc88] px-2 py-1 text-left text-[#006600]">
+                        {language === "hi" ? "नंबर" : "Number"}
+                      </th>
+                      <th className="border border-[#88cc88] px-2 py-1 text-left text-[#006600]">
+                        {language === "hi" ? "अभी का" : "Current"}
+                      </th>
+                      <th className="border border-[#88cc88] px-2 py-1 text-left text-[#006600]">
+                        {language === "hi" ? "जोड़ें" : "Add"}
+                      </th>
+                      <th className="border border-[#88cc88] px-2 py-1 text-left text-[#006600]">
+                        {language === "hi" ? "नया" : "New"}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {chatParsed.map(({ num, amount }) => {
+                      const current = toNum(values[num - 1]);
+                      return (
+                        <tr key={num} className="hover:bg-[#f0fff0]">
+                          <td className="border border-[#c0c0c0] px-2 py-1 font-bold text-[#003366]">
+                            [{num}]
+                          </td>
+                          <td className="border border-[#c0c0c0] px-2 py-1 text-[#666]">
+                            {current || 0}
+                          </td>
+                          <td className="border border-[#c0c0c0] px-2 py-1 text-[#cc6600] font-bold">
+                            +{amount}
+                          </td>
+                          <td className="border border-[#c0c0c0] px-2 py-1 font-bold text-[#006600]">
+                            {current + amount}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setValues((prev) => {
+                    const next = [...prev];
+                    for (const { num, amount } of chatParsed) {
+                      const idx = num - 1;
+                      next[idx] = String(toNum(next[idx]) + amount);
+                    }
+                    return next;
+                  });
+                  toast.success(
+                    language === "hi"
+                      ? `${chatParsed.length} नंबर में amount जोड़ दिया!`
+                      : `Added amount to ${chatParsed.length} numbers!`,
+                  );
+                  setChatInput("");
+                  setChatParsed([]);
+                }}
+                className="mt-3 w-full bg-[#006600] hover:bg-[#008800] text-white font-bold py-2.5 text-[14px] rounded-sm transition-colors"
+                data-ocid="chat.add_button"
+              >
+                ✚ {language === "hi" ? "सभी जोड़ें" : "Add All"}
+              </button>
+            </div>
+          )}
+
+          {chatInput.length > 0 && chatParsed.length === 0 && (
+            <div
+              className="bg-[#fff3cd] border border-[#cc8800] rounded-sm p-3 text-[12px] text-[#663300]"
+              data-ocid="chat.no_match"
+            >
+              {language === "hi"
+                ? "⚠️ कोई नंबर-amount pair नहीं मिला। Format: 5-500 या 5 500"
+                : "⚠️ No number-amount pairs found. Format: 5-500 or 5 500"}
+            </div>
+          )}
+
+          <div className="mt-4 bg-white border border-[#c0c0c0] rounded-sm p-3 text-center">
+            <div className="text-[11px] text-[#666]">Grand Total ({game})</div>
+            <div className="text-[28px] font-bold text-[#cc0000]">
+              {grandTotal.toLocaleString("en-IN")}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ===== BOTTOM NAV BAR ===== */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-[#c0c0c0] flex z-40">
         <button
@@ -2153,6 +2346,21 @@ export default function App() {
         >
           <span className="text-[18px] leading-none">⚙️</span>
           <span className="text-[10px] font-bold">{t.settings}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setScreen("chat")}
+          className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors ${
+            screen === "chat"
+              ? "bg-[#003366] text-white"
+              : "text-[#555] hover:bg-[#f0f0f0]"
+          }`}
+          data-ocid="nav.chat.tab"
+        >
+          <span className="text-[18px] leading-none">💬</span>
+          <span className="text-[10px] font-bold">
+            {language === "hi" ? "चैट" : "Chat"}
+          </span>
         </button>
       </div>
     </div>

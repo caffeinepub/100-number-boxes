@@ -2323,15 +2323,15 @@ export default function App() {
               <div className="text-[12px] font-bold text-[#006600] mb-2">
                 ✅{" "}
                 {language === "hi"
-                  ? `${chatParsed.length} एंट्री मिलीं:`
-                  : `${chatParsed.length} entries found:`}
+                  ? `${chatParsed.length} एंट्री मिलीं (edit कर सकते हो):`
+                  : `${chatParsed.length} entries found (editable):`}
               </div>
-              <div className="max-h-[180px] overflow-y-auto">
+              <div className="max-h-[260px] overflow-y-auto">
                 <table className="w-full border-collapse text-[11px]">
                   <thead>
                     <tr className="bg-[#e8ffe8]">
                       <th className="border border-[#88cc88] px-2 py-1 text-left text-[#006600]">
-                        {language === "hi" ? "नंबर" : "Number"}
+                        {language === "hi" ? "नंबर" : "No."}
                       </th>
                       <th className="border border-[#88cc88] px-2 py-1 text-left text-[#006600]">
                         {language === "hi" ? "अभी का" : "Current"}
@@ -2342,24 +2342,69 @@ export default function App() {
                       <th className="border border-[#88cc88] px-2 py-1 text-left text-[#006600]">
                         {language === "hi" ? "नया" : "New"}
                       </th>
+                      <th className="border border-[#88cc88] px-1 py-1 text-center text-[#006600]">
+                        ✕
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {chatParsed.map(({ num, amount }) => {
+                    {chatParsed.map(({ num, amount }, idx) => {
                       const current = toNum(values[num - 1]);
                       return (
-                        <tr key={num} className="hover:bg-[#f0fff0]">
-                          <td className="border border-[#c0c0c0] px-2 py-1 font-bold text-[#003366]">
-                            [{num}]
+                        // biome-ignore lint/suspicious/noArrayIndexKey: editable list needs index key
+                        <tr key={idx} className="hover:bg-[#f0fff0]">
+                          <td className="border border-[#c0c0c0] px-1 py-1">
+                            <input
+                              type="number"
+                              min={1}
+                              max={100}
+                              value={num}
+                              onChange={(e) => {
+                                const v = Number.parseInt(e.target.value) || 1;
+                                const clamped = Math.min(100, Math.max(1, v));
+                                setChatParsed((prev) => {
+                                  const next = [...prev];
+                                  next[idx] = { ...next[idx], num: clamped };
+                                  return next;
+                                });
+                              }}
+                              className="w-[44px] border border-[#003366] text-center font-bold text-[#003366] text-[11px] px-1 py-0.5 focus:outline-none focus:border-[#0055aa]"
+                            />
                           </td>
                           <td className="border border-[#c0c0c0] px-2 py-1 text-[#666]">
                             {current || 0}
                           </td>
-                          <td className="border border-[#c0c0c0] px-2 py-1 text-[#cc6600] font-bold">
-                            +{amount}
+                          <td className="border border-[#c0c0c0] px-1 py-1">
+                            <input
+                              type="number"
+                              min={0}
+                              value={amount}
+                              onChange={(e) => {
+                                const v = Number.parseInt(e.target.value) || 0;
+                                setChatParsed((prev) => {
+                                  const next = [...prev];
+                                  next[idx] = { ...next[idx], amount: v };
+                                  return next;
+                                });
+                              }}
+                              className="w-[60px] border border-[#cc6600] text-center font-bold text-[#cc6600] text-[11px] px-1 py-0.5 focus:outline-none focus:border-[#ff8800]"
+                            />
                           </td>
                           <td className="border border-[#c0c0c0] px-2 py-1 font-bold text-[#006600]">
                             {current + amount}
+                          </td>
+                          <td className="border border-[#c0c0c0] px-1 py-1 text-center">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setChatParsed((prev) =>
+                                  prev.filter((_, i) => i !== idx),
+                                );
+                              }}
+                              className="text-[#cc0000] font-bold text-[12px] hover:text-[#ff0000] px-1"
+                            >
+                              ✕
+                            </button>
                           </td>
                         </tr>
                       );
@@ -2367,30 +2412,44 @@ export default function App() {
                   </tbody>
                 </table>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setValues((prev) => {
-                    const next = [...prev];
-                    for (const { num, amount } of chatParsed) {
-                      const idx = num - 1;
-                      next[idx] = String(toNum(next[idx]) + amount);
-                    }
-                    return next;
-                  });
-                  toast.success(
-                    language === "hi"
-                      ? `${chatParsed.length} नंबर में amount जोड़ दिया!`
-                      : `Added amount to ${chatParsed.length} numbers!`,
-                  );
-                  setChatInput("");
-                  setChatParsed([]);
-                }}
-                className="mt-3 w-full bg-[#006600] hover:bg-[#008800] text-white font-bold py-2.5 text-[14px] rounded-sm transition-colors"
-                data-ocid="chat.add_button"
-              >
-                ✚ {language === "hi" ? "सभी जोड़ें" : "Add All"}
-              </button>
+              <div className="flex gap-2 mt-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setValues((prev) => {
+                      const next = [...prev];
+                      for (const { num, amount } of chatParsed) {
+                        const idx = num - 1;
+                        if (idx >= 0 && idx < 100) {
+                          next[idx] = String(toNum(next[idx]) + amount);
+                        }
+                      }
+                      return next;
+                    });
+                    toast.success(
+                      language === "hi"
+                        ? `${chatParsed.length} नंबर में amount जोड़ दिया!`
+                        : `Added amount to ${chatParsed.length} numbers!`,
+                    );
+                    setChatInput("");
+                    setChatParsed([]);
+                  }}
+                  className="flex-1 bg-[#006600] hover:bg-[#008800] text-white font-bold py-2.5 text-[14px] rounded-sm transition-colors"
+                  data-ocid="chat.add_button"
+                >
+                  ✚ {language === "hi" ? "सभी जोड़ें" : "Add All"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setChatInput("");
+                    setChatParsed([]);
+                  }}
+                  className="bg-[#cc0000] hover:bg-[#aa0000] text-white font-bold py-2.5 px-4 text-[13px] rounded-sm transition-colors"
+                >
+                  🗑 {language === "hi" ? "हटाएं" : "Clear"}
+                </button>
+              </div>
             </div>
           )}
 

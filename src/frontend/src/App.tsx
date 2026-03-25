@@ -1115,7 +1115,7 @@ export default function App() {
       setMultiplyN(newGameData.multiplyN);
       prevGameRef.current = selectedGame;
       setGame(selectedGame);
-      setScreen("home");
+      setScreen("entry");
     },
     [
       game,

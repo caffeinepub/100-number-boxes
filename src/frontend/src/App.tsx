@@ -361,24 +361,94 @@ function dateToTime(dateStr: string): bigint {
 function parseChatInput(text: string): Array<{ num: number; amount: number }> {
   const results: Array<{ num: number; amount: number }> = [];
   const seen = new Set<number>();
-  const cleaned = text
-    .replace(/नंबर|number|no\.|no |पर|में|pe|mein|add|jodo|जोड़ो/gi, " ")
-    .replace(/[,;|]/g, " ");
-  const patternSources = [
-    "(\\d{1,3})\\s*[-:=]\\s*(\\d+)",
-    "(\\d{1,3})\\s+(\\d{2,})",
-  ];
-  for (const src of patternSources) {
-    const regex = new RegExp(src, "g");
-    let match = regex.exec(cleaned);
-    while (match !== null) {
-      const num = Number.parseInt(match[1], 10);
-      const amount = Number.parseInt(match[2], 10);
+  const fullText = text.trim();
+
+  // Format 1: numbers line * amounts line
+  // e.g. "71*61*57*\n20*20*20*"
+  const inputLines = fullText
+    .split(/\n/)
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+  // Check if consecutive pairs of lines are num-line / amount-line separated by *
+  let i = 0;
+  while (i < inputLines.length - 1) {
+    const numsRaw = inputLines[i]
+      .split("*")
+      .map((s) => s.trim())
+      .filter((s) => /^\d+$/.test(s));
+    const amtsRaw = inputLines[i + 1]
+      .split("*")
+      .map((s) => s.trim())
+      .filter((s) => /^\d+$/.test(s));
+    if (
+      numsRaw.length > 0 &&
+      amtsRaw.length > 0 &&
+      numsRaw.every((n) => Number(n) >= 1 && Number(n) <= 100)
+    ) {
+      for (let j = 0; j < numsRaw.length; j++) {
+        const num = Number.parseInt(numsRaw[j], 10);
+        const amount = Number.parseInt(
+          amtsRaw[Math.min(j, amtsRaw.length - 1)],
+          10,
+        );
+        if (num >= 1 && num <= 100 && amount > 0 && !seen.has(num)) {
+          seen.add(num);
+          results.push({ num, amount });
+        }
+      }
+      i += 2;
+      continue;
+    }
+    i++;
+  }
+  if (results.length > 0) return results;
+
+  // Format 2: Batch format with ==== amount at end
+  // e.g. "86=68=05=50\n43=03\n88=58====  20"
+  const batchAmountMatch = fullText.match(/={2,}\s*(\d+)\s*$/);
+  if (batchAmountMatch) {
+    const batchAmount = Number.parseInt(batchAmountMatch[1], 10);
+    const numsText = fullText.slice(
+      0,
+      fullText.lastIndexOf(batchAmountMatch[0]),
+    );
+    const numMatches = numsText.match(/\d+/g) || [];
+    for (const ns of numMatches) {
+      const num = Number.parseInt(ns, 10);
+      if (num >= 1 && num <= 100 && !seen.has(num)) {
+        seen.add(num);
+        results.push({ num, amount: batchAmount });
+      }
+    }
+    return results;
+  }
+
+  // Format 3: Standard line-by-line number-amount per line
+  for (const line of inputLines) {
+    const cleaned = line
+      .replace(/नंबर|number|no\.\|no |पर|में|pe|mein|add|jodo|जोड़ो/gi, " ")
+      .replace(/[,;|]/g, " ");
+    const re1 = /(\d{1,3})\s*[-:=]\s*(\d+)/g;
+    let m = re1.exec(cleaned);
+    while (m !== null) {
+      const num = Number.parseInt(m[1], 10);
+      const amount = Number.parseInt(m[2], 10);
       if (num >= 1 && num <= 100 && amount > 0 && !seen.has(num)) {
         seen.add(num);
         results.push({ num, amount });
       }
-      match = regex.exec(cleaned);
+      m = re1.exec(cleaned);
+    }
+    const re2 = /(\d{1,3}) +(\d{2,})/g;
+    let m2 = re2.exec(cleaned);
+    while (m2 !== null) {
+      const num = Number.parseInt(m2[1], 10);
+      const amount = Number.parseInt(m2[2], 10);
+      if (num >= 1 && num <= 100 && amount > 0 && !seen.has(num)) {
+        seen.add(num);
+        results.push({ num, amount });
+      }
+      m2 = re2.exec(cleaned);
     }
   }
   return results;

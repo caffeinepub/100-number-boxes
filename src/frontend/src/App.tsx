@@ -658,6 +658,9 @@ export default function App() {
   const [chatParsed, setChatParsed] = useState<
     Array<{ num: number; amount: number }>
   >([]);
+  const [chatGame, setChatGame] = useState<(typeof GAMES)[number]>("DS");
+  const [chatQuickNum, setChatQuickNum] = useState("");
+  const [chatQuickAmt, setChatQuickAmt] = useState("");
 
   // Track previous game to save/load on change
   const prevGameRef = useRef(game);
@@ -2375,13 +2378,171 @@ export default function App() {
             >
               🏠 {language === "hi" ? "होम" : "Home"}
             </button>
-            <span
-              className="text-[13px] font-bold px-3 py-1 rounded-sm"
-              style={{ backgroundColor: gameColor.bg, color: gameColor.text }}
-            >
-              🎮 {game}
+            <span className="text-[11px] text-[#555] font-bold">
+              {language === "hi" ? "गेम चुनें:" : "Select Game:"}
             </span>
+            {GAMES.map((g) => {
+              const gc = GAME_COLORS[g] ?? GAME_COLORS.DS;
+              const isActive = chatGame === g;
+              return (
+                <button
+                  key={g}
+                  type="button"
+                  onClick={() => setChatGame(g)}
+                  className="text-[13px] font-bold px-3 py-1 rounded-sm border-2 transition-all"
+                  style={{
+                    backgroundColor: isActive ? gc.bg : "#fff",
+                    color: isActive ? gc.text : gc.bg,
+                    borderColor: gc.bg,
+                    transform: isActive ? "scale(1.1)" : "scale(1)",
+                  }}
+                  data-ocid={`chat.game_btn.${g}`}
+                >
+                  {g}
+                </button>
+              );
+            })}
           </div>
+
+          {/* Quick Entry for selected game */}
+          {(() => {
+            const qgc = GAME_COLORS[chatGame] ?? GAME_COLORS.DS;
+            const qgData = gameDataMap[chatGame] ?? defaultGameData();
+            const qNum = Number.parseInt(chatQuickNum) || 0;
+            const qCurrent =
+              qNum >= 1 && qNum <= 100
+                ? Number.parseInt(qgData.values[qNum - 1]) || 0
+                : null;
+            return (
+              <div
+                className="rounded-sm p-3 mb-3 border-2"
+                style={{ backgroundColor: qgc.light, borderColor: qgc.bg }}
+                data-ocid="chat.quick_entry"
+              >
+                <div
+                  className="text-[12px] font-bold mb-2"
+                  style={{ color: qgc.bg }}
+                >
+                  ✏️{" "}
+                  {language === "hi"
+                    ? `${chatGame} में सीधी एंट्री`
+                    : `Quick Entry in ${chatGame}`}
+                </div>
+                <div className="flex gap-2 items-end flex-wrap">
+                  <div className="flex flex-col gap-1">
+                    <label
+                      htmlFor="chat-quick-num"
+                      className="text-[10px] font-bold"
+                      style={{ color: qgc.bg }}
+                    >
+                      {language === "hi" ? "नंबर (1-100)" : "Number (1-100)"}
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={100}
+                      value={chatQuickNum}
+                      onChange={(e) => setChatQuickNum(e.target.value)}
+                      placeholder="जैसे: 25"
+                      className="w-[80px] border-2 text-center font-bold text-[13px] px-2 py-1.5 focus:outline-none"
+                      style={{ borderColor: qgc.bg, color: qgc.bg }}
+                      id="chat-quick-num"
+                      data-ocid="chat.quick_num"
+                    />
+                    {qCurrent !== null && (
+                      <div className="text-[10px] text-[#555]">
+                        {language === "hi" ? "अभी:" : "Now:"} {qCurrent}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label
+                      htmlFor="chat-quick-amt"
+                      className="text-[10px] font-bold"
+                      style={{ color: qgc.bg }}
+                    >
+                      {language === "hi" ? "Amount" : "Amount"}
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={chatQuickAmt}
+                      onChange={(e) => setChatQuickAmt(e.target.value)}
+                      placeholder="जैसे: 500"
+                      className="w-[100px] border-2 text-center font-bold text-[13px] px-2 py-1.5 focus:outline-none"
+                      style={{ borderColor: "#cc6600", color: "#cc6600" }}
+                      id="chat-quick-amt"
+                      data-ocid="chat.quick_amt"
+                    />
+                    {qCurrent !== null && chatQuickAmt && (
+                      <div className="text-[10px] text-[#006600] font-bold">
+                        {language === "hi" ? "नया:" : "New:"}{" "}
+                        {qCurrent + (Number.parseInt(chatQuickAmt) || 0)}
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const n = Number.parseInt(chatQuickNum);
+                      const a = Number.parseInt(chatQuickAmt);
+                      if (!n || n < 1 || n > 100) {
+                        toast.error(
+                          language === "hi"
+                            ? "सही नंबर डालें (1 से 100)"
+                            : "Enter valid number (1-100)",
+                        );
+                        return;
+                      }
+                      if (!a || a <= 0) {
+                        toast.error(
+                          language === "hi" ? "Amount डालें" : "Enter amount",
+                        );
+                        return;
+                      }
+                      if (chatGame === game) {
+                        // Update live values
+                        setValues((prev) => {
+                          const next = [...prev];
+                          next[n - 1] = String(
+                            (Number.parseInt(next[n - 1]) || 0) + a,
+                          );
+                          return next;
+                        });
+                      } else {
+                        // Update gameDataMap directly
+                        setGameDataMap((prev) => {
+                          const gd = prev[chatGame] ?? defaultGameData();
+                          const newVals = [...gd.values];
+                          newVals[n - 1] = String(
+                            (Number.parseInt(newVals[n - 1]) || 0) + a,
+                          );
+                          const updated = {
+                            ...prev,
+                            [chatGame]: { ...gd, values: newVals },
+                          };
+                          saveGameDataMap(updated);
+                          return updated;
+                        });
+                      }
+                      toast.success(
+                        language === "hi"
+                          ? `${chatGame}: नंबर ${n} में ${a} जोड़ा!`
+                          : `${chatGame}: Added ${a} to #${n}!`,
+                      );
+                      setChatQuickNum("");
+                      setChatQuickAmt("");
+                    }}
+                    className="px-4 py-1.5 text-white text-[13px] font-bold rounded-sm transition-colors"
+                    style={{ backgroundColor: qgc.bg }}
+                    data-ocid="chat.quick_add_btn"
+                  >
+                    ✚ {language === "hi" ? "जोड़ें" : "Add"}
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
 
           <div className="bg-[#e8f0ff] border-2 border-[#003366] rounded-sm p-4 mb-3">
             <div className="text-[14px] font-bold text-[#003366] mb-2">
@@ -2558,9 +2719,18 @@ export default function App() {
           )}
 
           <div className="mt-4 bg-white border border-[#c0c0c0] rounded-sm p-3 text-center">
-            <div className="text-[11px] text-[#666]">Grand Total ({game})</div>
+            <div className="text-[11px] text-[#666]">
+              Grand Total ({chatGame})
+            </div>
             <div className="text-[28px] font-bold text-[#cc0000]">
-              {grandTotal.toLocaleString("en-IN")}
+              {(() => {
+                if (chatGame === game)
+                  return grandTotal.toLocaleString("en-IN");
+                const gd = gameDataMap[chatGame] ?? defaultGameData();
+                return gd.values
+                  .reduce((s, v) => s + (Number.parseInt(v) || 0), 0)
+                  .toLocaleString("en-IN");
+              })()}
             </div>
           </div>
         </div>
